@@ -19,10 +19,34 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Korofinance | Money's an easy thing",
+  metadataBase: new URL('https://korofinance.com'),
+  title: "Korofinance | Money's an easy thing.",
   description: "Simplifying financial growth, real-time markets, and economy insights for every Nigerian.",
   icons: {
     icon: "/favicon-premium.png",
+  },
+  openGraph: {
+    title: "Korofinance",
+    description: "Africa's sharpest financial digest & real-time market terminal.",
+    url: "https://korofinance.com",
+    siteName: "Korofinance",
+    images: [
+      {
+        url: "/og-image.jpg", // We'll assume/use a generic placeholder path for now, user can swap
+        width: 1200,
+        height: 630,
+        alt: "Korofinance Market Dashboard Preview",
+      },
+    ],
+    locale: "en_NG",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Korofinance",
+    description: "Money's an easy thing. Real-time NGX stocks, Crypto, and African financial news.",
+    images: ["/og-image.jpg"],
+    creator: "@korofinance",
   },
 };
 
