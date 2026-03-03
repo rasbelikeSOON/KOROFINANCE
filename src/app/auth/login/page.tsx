@@ -15,17 +15,25 @@ export default function LoginPage() {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        console.log("Login submitted with:", { email, password });
+        alert("Login button clicked! Attempting to sign in...");
         setLoading(true);
         setError(null);
 
         try {
+            console.log("Calling supabase.auth.signInWithPassword...");
             const { error: signInError } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
 
-            if (signInError) throw signInError;
+            if (signInError) {
+                console.error("Supabase sign in error:", signInError);
+                throw signInError;
+            }
 
+            console.log("Sign in successful, redirecting...");
+            alert("Success! Redirecting to markets dashboard.");
             router.push("/markets");
             router.refresh();
         } catch (err: any) {

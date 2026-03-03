@@ -16,10 +16,13 @@ export default function RegisterPage() {
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
+        console.log("Register submitted with:", { email, fullName });
+        alert("Register button clicked! Attempting to create account...");
         setLoading(true);
         setError(null);
 
         try {
+            console.log("Calling supabase.auth.signUp...");
             const { data, error: signUpError } = await supabase.auth.signUp({
                 email,
                 password,
@@ -31,8 +34,12 @@ export default function RegisterPage() {
                 },
             });
 
-            if (signUpError) throw signUpError;
+            if (signUpError) {
+                console.error("Supabase sign up error:", signUpError);
+                throw signUpError;
+            }
 
+            console.log("Sign up successful, user data:", data);
             if (data.user) {
                 // Profile creation is handled by Supabase triggers (assuming following standard patterns)
                 // But we can also do a manual insert if the trigger isn't set up.
