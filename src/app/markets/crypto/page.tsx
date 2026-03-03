@@ -1,18 +1,25 @@
 "use client";
 
-import React from "react";
 import { TrendingUp, TrendingDown, Search, Activity, Bitcoin } from "lucide-react";
+import SaveButton from "@/components/markets/SaveButton";
 
-const CRYPTO_DATA = [
-    { id: "1", name: "Bitcoin", ticker: "BTC", price: "$67,778.00", ngnPrice: "₦92.4M", change: "-2.39%", p2p: "₦1,400", isPositive: false },
-    { id: "2", name: "Ethereum", ticker: "ETH", price: "$1,964.34", ngnPrice: "₦2.68M", change: "-4.47%", p2p: "₦1,390", isPositive: false },
-    { id: "3", name: "Solana", ticker: "SOL", price: "$84.64", ngnPrice: "₦115k", change: "-4.40%", p2p: "₦1,380", isPositive: false },
-    { id: "4", name: "BNB", ticker: "BNB", price: "$630.71", ngnPrice: "₦860k", change: "-2.58%", p2p: "₦1,395", isPositive: false },
-    { id: "5", name: "XRP", ticker: "XRP", price: "$1.36", ngnPrice: "₦1,855", change: "-3.53%", p2p: "₦1,385", isPositive: false },
-    { id: "6", name: "Cardano", ticker: "ADA", price: "$0.2661", ngnPrice: "₦363", change: "-6.16%", p2p: "₦1,380", isPositive: false },
-];
+import useSWR from "swr";
+import { supabase } from "@/lib/supabase";
+
+const fetchCrypto = async () => {
+    const { data, error } = await supabase
+        .from("market_cache")
+        .select("*")
+        .eq("market", "crypto")
+        .order("price", { ascending: false });
+
+    if (error) throw error;
+    return data;
+};
 
 export default function CryptoPage() {
+    const { data: cryptoData, isLoading } = useSWR("crypto_markets", fetchCrypto);
+
     return (
         <div className="space-y-8">
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -52,35 +59,50 @@ export default function CryptoPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border-card/50">
-                                {CRYPTO_DATA.map((coin) => (
-                                    <tr key={coin.id} className="group hover:bg-surface-2 transition-colors">
-                                        <td className="py-6 px-4">
-                                            <div className="flex items-center space-x-3">
-                                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary italic">
-                                                    {coin.ticker[0]}
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-foreground">{coin.name}</p>
-                                                    <p className="text-[10px] font-mono text-muted-foreground uppercase">{coin.ticker}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="py-6 px-4 font-mono font-bold text-sm tracking-tighter">{coin.price}</td>
-                                        <td className="py-6 px-4 font-mono font-bold text-sm tracking-tighter text-muted-foreground">{coin.ngnPrice}</td>
-                                        <td className={`py-6 px-4 font-mono font-bold text-right text-sm ${coin.isPositive ? "text-primary" : "text-destructive"}`}>
-                                            <span className="flex items-center justify-end">
-                                                {coin.isPositive ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                                                {coin.change}
-                                            </span>
-                                        </td>
-                                        <td className="py-6 px-4 font-mono font-bold text-right text-sm italic">{coin.p2p}/$</td>
-                                        <td className="py-6 px-4 text-right">
-                                            <button className="px-4 py-2 bg-surface-2 border border-border-card rounded-sm text-[10px] font-bold uppercase tracking-widest hover:border-primary transition-colors">
-                                                Trade
-                                            </button>
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan={6} className="py-12 text-center text-muted-foreground font-mono text-xs uppercase">
+                                            Loading Live Crypto Data...
                                         </td>
                                     </tr>
-                                ))}
+                                ) : cryptoData && cryptoData.length > 0 ? (
+                                    cryptoData.map((coin: any) => (
+                                        <tr key={coin.ticker} className="group hover:bg-surface-2 transition-colors">
+                                            <td className="py-6 px-4">
+                                                <div className="flex items-center space-x-3">
+                                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary italic">
+                                                        {coin.ticker[0]}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-bold text-foreground">{coin.name}</p>
+                                                        <p className="text-[10px] font-mono text-muted-foreground uppercase">{coin.ticker}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="py-6 px-4 font-mono font-bold text-sm tracking-tighter">${coin.price.toLocaleString()}</td>
+                                            <td className="py-6 px-4 font-mono font-bold text-sm tracking-tighter text-muted-foreground">--</td>
+                                            <td className={`py-6 px-4 font-mono font-bold text-right text-sm ${coin.change_pct >= 0 ? "text-primary" : "text-destructive"}`}>
+                                                <span className="flex items-center justify-end">
+                                                    {coin.change_pct >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+                                                    {coin.change_pct?.toFixed(2)}%
+                                                </span>
+                                            </td>
+                                            <td className="py-6 px-4 font-mono font-bold text-right text-sm italic">--</td>
+                                            <td className="py-6 px-4 text-right flex items-center justify-end space-x-2">
+                                                <SaveButton ticker={coin.ticker} market="crypto" />
+                                                <button className="px-4 py-2 bg-surface-2 border border-border-card rounded-sm text-[10px] font-bold uppercase tracking-widest hover:border-primary transition-colors">
+                                                    Trade
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={6} className="py-12 text-center text-muted-foreground font-mono text-xs uppercase">
+                                            No Crypto Data Available.
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>

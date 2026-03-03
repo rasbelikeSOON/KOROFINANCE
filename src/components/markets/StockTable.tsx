@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { TrendingUp, TrendingDown, Search, Filter, ArrowUpDown, Loader2 } from "lucide-react";
+import SaveButton from "@/components/markets/SaveButton";
 import useSWR from "swr";
 import { supabase } from "@/lib/supabase";
 
@@ -71,6 +72,7 @@ export default function StockTable() {
                                 <th className="py-4 px-4 whitespace-nowrap text-right">Change (%)</th>
                                 <th className="py-4 px-4 whitespace-nowrap text-center">Signal</th>
                                 <th className="py-4 px-4 whitespace-nowrap text-right">Volume</th>
+                                <th className="py-4 px-4 whitespace-nowrap text-right">Save</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border-card/50">
@@ -98,6 +100,11 @@ export default function StockTable() {
                                         </span>
                                     </td>
                                     <td className="py-5 px-4 font-mono text-xs text-muted-foreground text-right">{stock.volume?.toLocaleString() || "N/A"}</td>
+                                    <td className="py-5 px-4 text-right">
+                                        <div className="flex justify-end pr-2">
+                                            <SaveButton ticker={stock.ticker} market="ngx" />
+                                        </div>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

@@ -21,13 +21,13 @@ export default function Footer() {
                             Money&apos;s an Easy Thing. Real-time markets, news, and education for the modern African investor.
                         </p>
                         <div className="flex space-x-4">
-                            <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                            <Link href="https://twitter.com/korofinance" target="_blank" className="text-muted-foreground hover:text-primary transition-colors">
                                 <Twitter className="w-5 h-5" />
                             </Link>
                             <Link href="https://www.linkedin.com/company/korofinance" target="_blank" className="text-muted-foreground hover:text-primary transition-colors">
                                 <Linkedin className="w-5 h-5" />
                             </Link>
-                            <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                            <Link href="https://instagram.com/korofinance" target="_blank" className="text-muted-foreground hover:text-primary transition-colors">
                                 <Instagram className="w-5 h-5" />
                             </Link>
                         </div>
@@ -48,10 +48,10 @@ export default function Footer() {
                     <div>
                         <h4 className="font-display font-bold text-foreground mb-6">Learn</h4>
                         <ul className="space-y-4">
-                            <li><Link href="/learn/investing" className="text-sm text-muted-foreground hover:text-primary transition-colors">Investing 101</Link></li>
-                            <li><Link href="/learn/crypto" className="text-sm text-muted-foreground hover:text-primary transition-colors">Crypto Basics</Link></li>
-                            <li><Link href="/learn/policy" className="text-sm text-muted-foreground hover:text-primary transition-colors">CBN Policy</Link></li>
-                            <li><Link href="/learn/macro" className="text-sm text-muted-foreground hover:text-primary transition-colors">Macroeconomics</Link></li>
+                            <li><Link href="/learn" className="text-sm text-muted-foreground hover:text-primary transition-colors">Investing 101</Link></li>
+                            <li><Link href="/learn" className="text-sm text-muted-foreground hover:text-primary transition-colors">Crypto Basics</Link></li>
+                            <li><Link href="/learn" className="text-sm text-muted-foreground hover:text-primary transition-colors">CBN Policy</Link></li>
+                            <li><Link href="/learn" className="text-sm text-muted-foreground hover:text-primary transition-colors">Macroeconomics</Link></li>
                         </ul>
                     </div>
 
@@ -59,10 +59,10 @@ export default function Footer() {
                     <div>
                         <h4 className="font-display font-bold text-foreground mb-6">Company</h4>
                         <ul className="space-y-4">
-                            <li><Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">About Koro</Link></li>
-                            <li><Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Our Blog</Link></li>
-                            <li><Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Contact Us</Link></li>
-                            <li><Link href="/advertise" className="text-sm text-muted-foreground hover:text-primary transition-colors">Advertise</Link></li>
+                            <li><span className="text-sm text-muted-foreground cursor-not-allowed">About Koro</span></li>
+                            <li><Link href="/news" className="text-sm text-muted-foreground hover:text-primary transition-colors">Our Blog</Link></li>
+                            <li><a href="mailto:hello@korofinance.com" className="text-sm text-muted-foreground hover:text-primary transition-colors">Contact Us</a></li>
+                            <li><a href="mailto:hello@korofinance.com" className="text-sm text-muted-foreground hover:text-primary transition-colors">Advertise</a></li>
                         </ul>
                     </div>
                 </div>
@@ -75,9 +75,9 @@ export default function Footer() {
                     <div className="flex flex-col md:flex-row items-center justify-between text-xs text-muted-foreground">
                         <p>© 2025 Korofinance. Built for Africa.</p>
                         <div className="flex space-x-6 mt-4 md:mt-0">
-                            <Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
-                            <Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
-                            <Link href="/disclaimer" className="hover:text-primary transition-colors">Full Disclaimer</Link>
+                            <span className="text-muted-foreground cursor-not-allowed">Privacy Policy</span>
+                            <span className="text-muted-foreground cursor-not-allowed">Terms of Service</span>
+                            <span className="text-muted-foreground cursor-not-allowed">Full Disclaimer</span>
                         </div>
                     </div>
                 </div>

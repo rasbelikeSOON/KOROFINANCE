@@ -70,3 +70,34 @@ CREATE POLICY "Allow insertions into news_articles" ON news_articles FOR INSERT 
 
 DROP POLICY IF EXISTS "Allow updates into news_articles" ON news_articles;
 CREATE POLICY "Allow updates into news_articles" ON news_articles FOR UPDATE USING (true) WITH CHECK (true);
+
+-- 4. Newsletter Subscribers
+CREATE TABLE IF NOT EXISTS subscribers (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE subscribers ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow insertions into subscribers" ON subscribers;
+CREATE POLICY "Allow insertions into subscribers" ON subscribers FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Subscribers are viewable by admin only" ON subscribers;
+-- For now, we keep it simple or allow true if needed for frontend checks, but let's allow inserting.
+CREATE POLICY "Subscribers are viewable by everyone" ON subscribers FOR SELECT USING (true);
+
+-- 5. User Watchlists
+CREATE TABLE IF NOT EXISTS watchlists (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
+  ticker TEXT NOT NULL,
+  market TEXT NOT NULL, -- 'ngx', 'crypto', etc.
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, ticker)
+);
+
+ALTER TABLE watchlists ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can manage own watchlists" ON watchlists;
+CREATE POLICY "Users can manage own watchlists" ON watchlists FOR ALL USING (auth.uid() = user_id);

@@ -1,9 +1,40 @@
 "use client";
 
-import React from "react";
-import { Send } from "lucide-react";
+import React, { useState } from "react";
+import { Send, Loader2, CheckCircle2 } from "lucide-react";
 
 export default function NewsletterCTA() {
+    const [email, setEmail] = useState("");
+    const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+    const [message, setMessage] = useState("");
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!email) return;
+
+        setStatus("loading");
+        setMessage("");
+
+        try {
+            const res = await fetch("/api/newsletter", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.error || "Something went wrong");
+
+            setStatus("success");
+            setMessage("You're in! Welcome to The Koro Brief.");
+            setEmail("");
+        } catch (err: any) {
+            setStatus("error");
+            setMessage(err.message);
+        }
+    };
+
     return (
         <section className="py-24 bg-background relative overflow-hidden">
             {/* Accents */}
@@ -22,22 +53,41 @@ export default function NewsletterCTA() {
                     </p>
 
                     <form
-                        onSubmit={(e) => e.preventDefault()}
+                        onSubmit={handleSubmit}
                         className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto pt-4"
                     >
                         <input
                             type="email"
                             placeholder="Enter your email"
-                            className="flex-grow bg-surface border border-border-card px-6 py-4 rounded-sm text-foreground focus:outline-none focus:border-primary transition-colors font-mono"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            disabled={status === "loading" || status === "success"}
+                            required
+                            className="flex-grow bg-surface border border-border-card px-6 py-4 rounded-sm text-foreground focus:outline-none focus:border-primary transition-colors font-mono disabled:opacity-50"
                         />
                         <button
                             type="submit"
-                            className="px-8 py-4 bg-primary text-background font-bold rounded-sm flex items-center justify-center hover:bg-primary/90 transition-all active:scale-95 group"
+                            disabled={status === "loading" || status === "success"}
+                            className="px-8 py-4 bg-primary text-background font-bold rounded-sm flex items-center justify-center hover:bg-primary/90 transition-all active:scale-95 group disabled:opacity-50 disabled:pointer-events-none"
                         >
-                            Subscribe
-                            <Send className="ml-2 w-4 h-4 group-hover:-rotate-12 transition-transform" />
+                            {status === "loading" ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : status === "success" ? (
+                                <CheckCircle2 className="w-5 h-5" />
+                            ) : (
+                                <>
+                                    Subscribe
+                                    <Send className="ml-2 w-4 h-4 group-hover:-rotate-12 transition-transform" />
+                                </>
+                            )}
                         </button>
                     </form>
+
+                    {message && (
+                        <div className={`text-sm font-mono font-bold mt-2 ${status === "success" ? "text-primary" : "text-destructive"}`}>
+                            {message}
+                        </div>
+                    )}
 
                     <div className="pt-8 flex flex-col items-center space-y-4">
                         <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest">

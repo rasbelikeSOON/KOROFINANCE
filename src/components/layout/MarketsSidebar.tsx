@@ -9,16 +9,18 @@ import {
     Coins,
     Globe2,
     LayoutDashboard,
-    LineChart
+    LineChart,
+    Bookmark
 } from "lucide-react";
 
 const SIDEBAR_ITEMS = [
     { label: "Overview", href: "/markets", icon: <LayoutDashboard className="w-4 h-4" /> },
+    { label: "Watchlist", href: "/markets/watchlist", icon: <Bookmark className="w-4 h-4" /> },
     { label: "NGX Stocks", href: "/markets/ngx", icon: <BarChart3 className="w-4 h-4" /> },
     { label: "Crypto", href: "/markets/crypto", icon: <Bitcoin className="w-4 h-4" /> },
     { label: "Pan-Africa", href: "/markets/pan-africa", icon: <Globe2 className="w-4 h-4" /> },
     { label: "Forex", href: "/markets/forex", icon: <LineChart className="w-4 h-4" /> },
-    { label: "Commodities", href: "/markets/commodities", icon: <Coins className="w-4 h-4" />, comingSoon: true },
+    // { label: "Commodities", href: "/markets/commodities", icon: <Coins className="w-4 h-4" />, comingSoon: true },
 ];
 
 export default function MarketsSidebar() {
@@ -34,21 +36,16 @@ export default function MarketsSidebar() {
                     {SIDEBAR_ITEMS.map((item) => (
                         <Link
                             key={item.label}
-                            href={item.comingSoon ? "#" : item.href}
+                            href={item.href}
                             className={`flex items-center justify-between px-4 py-3 rounded-sm text-sm font-medium transition-all ${pathname === item.href
-                                    ? "bg-primary/10 text-primary border-l-2 border-primary"
-                                    : "text-muted-foreground hover:text-foreground hover:bg-surface-2"
-                                } ${item.comingSoon ? "opacity-50 cursor-not-allowed" : ""}`}
+                                ? "bg-primary/10 text-primary border-l-2 border-primary"
+                                : "text-muted-foreground hover:text-foreground hover:bg-surface-2"
+                                }`}
                         >
                             <div className="flex items-center space-x-3">
                                 {item.icon}
                                 <span>{item.label}</span>
                             </div>
-                            {item.comingSoon && (
-                                <span className="text-[8px] font-bold uppercase tracking-tighter bg-surface-2 px-1 rounded-sm">
-                                    Soon
-                                </span>
-                            )}
                         </Link>
                     ))}
                 </nav>
