@@ -23,9 +23,8 @@ export default function Navbar() {
                         <div className="w-10 h-10 bg-primary rounded-sm flex items-center justify-center font-display font-bold text-background">
                             K
                         </div>
-                        <span className="text-xl font-display font-bold tracking-tight text-foreground flex flex-col leading-none">
-                            <span>KORO<span className="text-primary">FINANCE</span></span>
-                            <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-[0.2em] mt-1 ml-0.5">Decoded</span>
+                        <span className="text-xl font-display font-bold tracking-tight text-foreground leading-none">
+                            KORO<span className="text-primary">FINANCE</span>
                         </span>
                     </Link>
 
