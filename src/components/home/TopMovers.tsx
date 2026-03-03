@@ -79,7 +79,7 @@ export default function TopMovers() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border-card/50">
-                                {movers.map((item: any) => (
+                                {movers.slice(0, 5).map((item: any) => (
                                     <tr
                                         key={item.ticker}
                                         className="group hover:bg-background/40 transition-all duration-200 hover:-translate-y-[1px] cursor-pointer"
