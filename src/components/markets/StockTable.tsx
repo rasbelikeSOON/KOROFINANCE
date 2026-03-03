@@ -64,6 +64,7 @@ export default function StockTable() {
                             <tr className="border-b border-border-card text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest bg-surface/30">
                                 <th className="py-4 px-4 whitespace-nowrap">Ticker</th>
                                 <th className="py-4 px-4 whitespace-nowrap">Company</th>
+                                <th className="py-4 px-4 whitespace-nowrap">Sector</th>
                                 <th className="py-4 px-4 whitespace-nowrap">Price (₦)</th>
                                 <th className="py-4 px-4 whitespace-nowrap text-right">Change</th>
                                 <th className="py-4 px-4 whitespace-nowrap text-center">Signal</th>
@@ -80,7 +81,8 @@ export default function StockTable() {
                                         }`}
                                 >
                                     <td className="py-5 px-4 font-mono font-bold text-foreground">{stock.ticker}</td>
-                                    <td className="py-5 px-4 font-bold text-foreground/80 text-sm">{stock.name || stock.ticker}</td>
+                                    <td className="py-5 px-4 font-bold text-foreground/80 text-sm whitespace-nowrap">{stock.name || stock.ticker}</td>
+                                    <td className="py-5 px-4 font-mono text-[10px] text-muted-foreground uppercase">{stock.sector || "N/A"}</td>
                                     <td className="py-5 px-4 font-mono font-bold text-sm">{stock.price.toLocaleString()}</td>
                                     <td className={`py-5 px-4 font-mono font-bold text-right text-sm ${stock.change_pct >= 0 ? "text-primary" : "text-destructive"}`}>
                                         <span className="flex items-center justify-end">

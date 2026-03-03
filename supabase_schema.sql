@@ -8,9 +8,15 @@ CREATE TABLE IF NOT EXISTS market_cache (
   name TEXT,
   price DECIMAL NOT NULL,
   change_pct DECIMAL,
-  market TEXT, -- 'ngx', 'crypto', 'forex'
+  volume BIGINT, -- Added for NGX Stocks
+  sector TEXT,   -- Added for NGX Stocks
+  market TEXT,   -- 'ngx', 'crypto', 'forex'
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- NOTE: If the table already exists, run these in the SQL Editor:
+-- ALTER TABLE market_cache ADD COLUMN IF NOT EXISTS volume BIGINT;
+-- ALTER TABLE market_cache ADD COLUMN IF NOT EXISTS sector TEXT;
 
 -- 2. User Profiles
 CREATE TABLE IF NOT EXISTS profiles (

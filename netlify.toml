@@ -8,6 +8,9 @@
 [functions]
   directory = "netlify/functions"
 
+[functions.refresh-market-data]
+  schedule = "@daily"
+
 [[headers]]
   for = "/api/*"
   [headers.values]
