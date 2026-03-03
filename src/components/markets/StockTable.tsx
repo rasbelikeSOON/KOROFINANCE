@@ -54,9 +54,11 @@ export default function StockTable() {
             {/* Table */}
             <div className="overflow-x-auto min-h-[400px]">
                 {isLoading ? (
-                    <div className="flex flex-col items-center justify-center py-20 space-y-4">
-                        <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Loading Live NGX Terminal...</p>
+                    <div className="w-full space-y-4">
+                        <div className="h-10 bg-surface-2 animate-pulse w-full rounded-sm" />
+                        {[1, 2, 3, 4, 5].map((i) => (
+                            <div key={i} className="h-14 bg-surface-2/50 animate-pulse w-full rounded-sm" />
+                        ))}
                     </div>
                 ) : filteredStocks.length > 0 ? (
                     <table className="w-full text-left">
@@ -66,7 +68,7 @@ export default function StockTable() {
                                 <th className="py-4 px-4 whitespace-nowrap">Company</th>
                                 <th className="py-4 px-4 whitespace-nowrap">Sector</th>
                                 <th className="py-4 px-4 whitespace-nowrap">Price (₦)</th>
-                                <th className="py-4 px-4 whitespace-nowrap text-right">Change</th>
+                                <th className="py-4 px-4 whitespace-nowrap text-right">Change (%)</th>
                                 <th className="py-4 px-4 whitespace-nowrap text-center">Signal</th>
                                 <th className="py-4 px-4 whitespace-nowrap text-right">Volume</th>
                             </tr>
@@ -75,10 +77,7 @@ export default function StockTable() {
                             {filteredStocks.map((stock: any) => (
                                 <tr
                                     key={stock.ticker}
-                                    className={`group cursor-pointer transition-colors ${stock.change_pct > 2 ? "hover:bg-primary/5" :
-                                        stock.change_pct < -2 ? "hover:bg-destructive/5" :
-                                            "hover:bg-surface-2"
-                                        }`}
+                                    className="group cursor-pointer transition-all duration-200 hover:bg-surface-2 hover:-translate-y-[1px]"
                                 >
                                     <td className="py-5 px-4 font-mono font-bold text-foreground">{stock.ticker}</td>
                                     <td className="py-5 px-4 font-bold text-foreground/80 text-sm whitespace-nowrap">{stock.name || stock.ticker}</td>
@@ -87,13 +86,13 @@ export default function StockTable() {
                                     <td className={`py-5 px-4 font-mono font-bold text-right text-sm ${stock.change_pct >= 0 ? "text-primary" : "text-destructive"}`}>
                                         <span className="flex items-center justify-end">
                                             {stock.change_pct >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                                            {stock.change_pct?.toFixed(2)}%
+                                            {stock.change_pct?.toFixed(2)}
                                         </span>
                                     </td>
                                     <td className="py-5 px-4 text-center">
-                                        <span className={`px-2 py-1 rounded-sm text-[10px] font-bold uppercase tracking-widest ${stock.change_pct > 2 ? "bg-primary/10 text-primary border border-primary/20" :
-                                            stock.change_pct < -2 ? "bg-destructive/10 text-destructive border border-destructive/20" :
-                                                "bg-warning/10 text-warning border border-warning/20"
+                                        <span className={`px-2 py-1 rounded-sm text-[10px] font-bold uppercase tracking-widest border ${stock.change_pct > 2 ? "bg-primary/5 text-primary border-primary/20" :
+                                            stock.change_pct < -2 ? "bg-destructive/5 text-destructive border-destructive/20" :
+                                                "bg-warning/5 text-warning border-warning/20"
                                             }`}>
                                             {stock.change_pct > 2 ? "BUY" : stock.change_pct < -2 ? "SELL" : "HOLD"}
                                         </span>

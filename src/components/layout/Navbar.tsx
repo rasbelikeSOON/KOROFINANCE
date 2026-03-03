@@ -19,13 +19,13 @@ export default function Navbar() {
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center space-x-2 group">
-                        <div className="w-8 h-8 bg-primary rounded-sm flex items-center justify-center font-display font-bold text-background transform group-hover:rotate-12 transition-transform">
-                            ₦
+                    <Link href="/" className="flex items-center space-x-3 group transition-transform duration-200 hover:-translate-y-[2px]">
+                        <div className="w-10 h-10 bg-primary rounded-sm flex items-center justify-center font-display font-bold text-background">
+                            K
                         </div>
                         <span className="text-xl font-display font-bold tracking-tight text-foreground flex flex-col leading-none">
                             <span>KORO<span className="text-primary">FINANCE</span></span>
-                            <span className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest mt-0.5">Money Simplified</span>
+                            <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-[0.2em] mt-1 ml-0.5">Decoded</span>
                         </span>
                     </Link>
 

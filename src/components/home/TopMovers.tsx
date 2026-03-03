@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { TrendingUp, TrendingDown, ChevronRight, ArrowRight, Loader2 } from "lucide-react";
 import useSWR from "swr";
 import { supabase } from "@/lib/supabase";
@@ -59,70 +60,72 @@ export default function TopMovers() {
 
                 <div className="overflow-x-auto min-h-[400px]">
                     {isLoading ? (
-                        <div className="flex flex-col items-center justify-center py-20 space-y-4">
-                            <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Accessing Market Terminal...</p>
+                        <div className="w-full space-y-4">
+                            <div className="h-10 bg-background animate-pulse w-full rounded-sm" />
+                            {[1, 2, 3, 4].map((i) => (
+                                <div key={i} className="h-14 bg-background/50 animate-pulse w-full rounded-sm" />
+                            ))}
                         </div>
                     ) : movers && movers.length > 0 ? (
                         <table className="w-full text-left">
                             <thead>
-                                <tr className="border-b border-border-card text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest">
-                                    <th className="pb-4 px-4 whitespace-nowrap">Ticker</th>
-                                    <th className="pb-4 px-4 whitespace-nowrap">Asset Name</th>
-                                    <th className="pb-4 px-4 whitespace-nowrap">Price</th>
-                                    <th className="pb-4 px-4 whitespace-nowrap text-right">24H Change</th>
-                                    <th className="pb-4 px-4 whitespace-nowrap text-center">Signal</th>
-                                    <th className="pb-4 px-4"></th>
+                                <tr className="border-b border-border-card text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest bg-background/30">
+                                    <th className="py-4 px-4 whitespace-nowrap">Ticker</th>
+                                    <th className="py-4 px-4 whitespace-nowrap">Asset Name</th>
+                                    <th className="py-4 px-4 whitespace-nowrap">Price</th>
+                                    <th className="py-4 px-4 whitespace-nowrap text-right">24H Change (%)</th>
+                                    <th className="py-4 px-4 whitespace-nowrap text-center">Signal</th>
+                                    <th className="py-4 px-4"></th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border-card/50">
                                 {movers.map((item: any) => (
                                     <tr
                                         key={item.ticker}
-                                        className="group hover:bg-surface-2 transition-colors"
+                                        className="group hover:bg-background/40 transition-all duration-200 hover:-translate-y-[1px] cursor-pointer"
                                     >
                                         <td className="py-6 px-4 font-mono font-bold text-foreground">{item.ticker}</td>
-                                        <td className="py-6 px-4 font-bold text-foreground/80">{item.name || item.ticker}</td>
-                                        <td className="py-6 px-4 font-mono font-bold">
-                                            {activeTab === "Crypto" ? "$" : activeTab === "Forex" ? "" : "₦"}
+                                        <td className="py-6 px-4 font-bold text-foreground/80 text-sm">{item.name || item.ticker}</td>
+                                        <td className="py-6 px-4 font-mono font-bold text-sm">
+                                            {activeTab === "Crypto" ? "$" : ""}
                                             {item.price.toLocaleString()}
-                                            {activeTab === "Forex" && " / NGN"}
+                                            {activeTab === "Forex" ? " NGN" : activeTab === "NGX" ? " ₦" : ""}
                                         </td>
-                                        <td className={`py-6 px-4 font-mono font-bold text-right ${item.change_pct >= 0 ? "text-primary" : "text-destructive"}`}>
+                                        <td className={`py-6 px-4 font-mono font-bold text-right text-sm ${item.change_pct >= 0 ? "text-primary" : "text-destructive"}`}>
                                             <span className="flex items-center justify-end">
                                                 {item.change_pct >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                                                {item.change_pct?.toFixed(2)}%
+                                                {item.change_pct?.toFixed(2)}
                                             </span>
                                         </td>
                                         <td className="py-6 px-4 text-center">
-                                            <span className={`px-2 py-1 rounded-sm text-[10px] font-bold uppercase tracking-widest ${item.change_pct > 2 ? "bg-primary/10 text-primary border border-primary/20" :
-                                                item.change_pct < -2 ? "bg-destructive/10 text-destructive border border-destructive/20" :
-                                                    "bg-warning/10 text-warning border border-warning/20"
+                                            <span className={`px-2 py-1 rounded-sm text-[10px] font-bold uppercase tracking-widest border ${item.change_pct > 2 ? "bg-primary/5 text-primary border-primary/20" :
+                                                item.change_pct < -2 ? "bg-destructive/5 text-destructive border-destructive/20" :
+                                                    "bg-warning/5 text-warning border-warning/20"
                                                 }`}>
                                                 {item.change_pct > 2 ? "BUY" : item.change_pct < -2 ? "SELL" : "HOLD"}
                                             </span>
                                         </td>
                                         <td className="py-6 px-4 text-right">
-                                            <button className="p-2 text-muted-foreground hover:text-primary transition-colors">
-                                                <ChevronRight className="w-5 h-5" />
-                                            </button>
+                                            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors ml-auto" />
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     ) : (
-                        <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-border-card rounded-md">
-                            <p className="text-muted-foreground font-mono text-xs uppercase">No live data found in terminal</p>
-                            <p className="text-[10px] text-muted-foreground mt-2 uppercase">Connect your API keys and trigger the refresh function</p>
+                        <div className="flex flex-col items-center justify-center py-20 border border-dashed border-border-card rounded-sm">
+                            <p className="text-muted-foreground font-mono text-[10px] uppercase tracking-widest">No terminal data found</p>
                         </div>
                     )}
                 </div>
 
                 <div className="mt-12 text-center">
-                    <button className="inline-flex items-center px-8 py-4 border border-border-card text-foreground font-bold rounded-sm hover:bg-surface transition-all active:scale-95">
-                        View full market data <ArrowRight className="ml-2 w-5 h-5" />
-                    </button>
+                    <Link
+                        href="/markets"
+                        className="inline-flex items-center px-10 py-4 border border-border-card text-foreground font-bold rounded-sm hover:bg-background/50 transition-all active:scale-[0.98]"
+                    >
+                        View Full Terminal <ArrowRight className="ml-2 w-4 h-4" />
+                    </Link>
                 </div>
             </div>
         </section>

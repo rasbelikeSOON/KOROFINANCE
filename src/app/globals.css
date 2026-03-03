@@ -1,54 +1,88 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0A0C0F;
-  --color-foreground: #F0F2F5;
-  --color-surface: #111318;
-  --color-surface-2: #1A1D24;
-  --color-border-card: #1F2430;
+  /* Neutral Professional Palette */
+  --color-background: #050608;
+  --color-foreground: #F8F9FA;
+  --color-surface: #0F1115;
+  --color-surface-2: #16191E;
+  --color-border-card: #1C2127;
   --color-primary: #00E87A;
-  --color-success: #00E87A;
-  --color-destructive: #FF4848;
-  --color-warning: #F5C842;
-  --color-muted-foreground: #6B7280;
+  --color-muted-foreground: #8B949E;
 
+  /* Typography Scale */
   --font-display: var(--font-syne);
   --font-sans: var(--font-instrument);
   --font-mono: var(--font-mono);
 
-  --radius-lg: 1rem;
-  --radius-md: 0.75rem;
-  --radius-sm: 0.5rem;
+  /* Strict Constraint System */
+  --radius-none: 0;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+
+  /* Standard Easing */
+  --ease-professional: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 :root {
-  --background: #0A0C0F;
-  --foreground: #F0F2F5;
+  --background: #050608;
+  --foreground: #F8F9FA;
+
+  /* Type Scale */
+  --text-xs: 0.75rem;
+  /* 12px */
+  --text-sm: 0.875rem;
+  /* 14px */
+  --text-base: 1rem;
+  /* 16px */
+  --text-lg: 1.125rem;
+  /* 18px */
+  --text-xl: 1.25rem;
+  /* 20px */
+  --text-2xl: 1.5rem;
+  /* 24px */
+  --text-3xl: 1.875rem;
+  /* 30px */
+  --text-4xl: 2.25rem;
+  /* 36px */
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-instrument), system-ui, sans-serif;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6, .font-display {
+h1,
+h2,
+h3,
+.font-display {
   font-family: var(--font-syne), sans-serif;
+  line-height: 1.1;
+  font-weight: 700;
 }
 
-.font-mono {
-  font-family: var(--font-mono), monospace;
+/* UI Elements */
+.card-professional {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-sm);
+  transition: transform 0.2s var(--ease-professional), border-color 0.2s var(--ease-professional);
 }
 
-/* Custom Utilities */
+.card-professional:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
+}
+
+/* Remove generic glows and vibe-coding */
 .glass {
-  background: rgba(17, 19, 24, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid #1F2430;
+  background: rgba(15, 17, 21, 0.95);
+  border: 1px solid var(--color-border-card);
 }
 
 .ticker-mask {
-  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
 }

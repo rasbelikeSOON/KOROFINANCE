@@ -1,3 +1,8 @@
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import { ArrowRight, Clock } from "lucide-react";
 import useSWR from "swr";
 import { getLiveNews } from "@/lib/api/news";
 import { formatDistanceToNow } from "date-fns";
@@ -29,9 +34,26 @@ export default function FeaturedNews() {
                 </div>
 
                 {isLoading ? (
-                    <div className="flex flex-col items-center justify-center py-20">
-                        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4" />
-                        <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Syncing news terminal...</p>
+                    <div className="grid lg:grid-cols-12 gap-8">
+                        {/* Hero Skeleton */}
+                        <div className="lg:col-span-7 space-y-6">
+                            <div className="aspect-[16/9] bg-surface-2 animate-pulse rounded-sm" />
+                            <div className="h-10 bg-surface-2 animate-pulse w-3/4 rounded-sm" />
+                            <div className="space-y-3">
+                                <div className="h-4 bg-surface-2 animate-pulse w-full rounded-sm" />
+                                <div className="h-4 bg-surface-2 animate-pulse w-5/6 rounded-sm" />
+                            </div>
+                        </div>
+                        {/* Side List Skeleton */}
+                        <div className="lg:col-span-5 space-y-10">
+                            {[1, 2, 3].map((i) => (
+                                <div key={i} className="space-y-3 border-b border-border-card/50 pb-8 last:border-0">
+                                    <div className="h-3 bg-surface-2 animate-pulse w-16 rounded-sm" />
+                                    <div className="h-6 bg-surface-2 animate-pulse w-full rounded-sm" />
+                                    <div className="h-3 bg-surface-2 animate-pulse w-24 rounded-sm" />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 ) : heroArticle ? (
                     <div className="grid lg:grid-cols-12 gap-8">
