@@ -6,7 +6,7 @@
   package = "@netlify/plugin-nextjs"
 
 [functions]
-  directory = "netlify/functions"
+  directory = "src/netlify/functions"
 
 [functions.refresh-market-data]
   schedule = "@daily"
