@@ -5,7 +5,7 @@ import Link from "next/link";
 import { TrendingUp, ArrowRight, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import useSWR from "swr";
-import { getLiveNews } from "@/lib/api/news";
+import { getLiveNews, NewsArticle } from "@/lib/api/news";
 
 export default function Hero() {
     return (
@@ -173,7 +173,7 @@ function TrendingNewsStack() {
                         <div key={i} className="h-10 bg-surface-2 animate-pulse rounded-sm" />
                     ))
                 ) : (
-                    news?.map((item, i) => (
+                    news?.map((item: NewsArticle, i: number) => (
                         <motion.div
                             key={item.id}
                             initial={{ opacity: 0, x: -10 }}

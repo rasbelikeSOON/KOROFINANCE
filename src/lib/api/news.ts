@@ -55,12 +55,12 @@ export async function fetchExternalNews() {
     return allArticles;
 }
 
-export async function getLiveNews() {
+export async function getLiveNews(limit: number = 10) {
     const { data, error } = await supabase
         .from("news_articles")
         .select("*")
         .order("published_at", { ascending: false })
-        .limit(10);
+        .limit(limit);
 
     if (error) throw error;
     return data || [];
