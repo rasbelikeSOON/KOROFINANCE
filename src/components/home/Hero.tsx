@@ -119,8 +119,8 @@ export default function Hero() {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-lg font-mono font-bold">$64,234.12</p>
-                                        <p className="text-xs font-mono text-primary">+0.8%</p>
+                                        <p className="text-lg font-mono font-bold">$67,778.00</p>
+                                        <p className="text-xs font-mono text-destructive">-2.39%</p>
                                     </div>
                                 </div>
                             </div>
@@ -136,7 +136,7 @@ export default function Hero() {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-lg font-mono font-bold">₦1,645.00</p>
+                                        <p className="text-lg font-mono font-bold">₦1,363.76</p>
                                         <p className="text-xs font-mono text-muted-foreground">Official</p>
                                     </div>
                                 </div>

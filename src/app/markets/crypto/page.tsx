@@ -3,14 +3,13 @@
 import React from "react";
 import { TrendingUp, TrendingDown, Search, Activity, Bitcoin } from "lucide-react";
 
-const MOCK_CRYPTO = [
-    { id: "1", name: "Bitcoin", ticker: "BTC", price: "$64,234.12", ngnPrice: "₦105.6M", change: "+0.82%", p2p: "₦1,655", isPositive: true },
-    { id: "2", name: "Ethereum", ticker: "ETH", price: "$3,456.78", ngnPrice: "₦5.68M", change: "+1.24%", p2p: "₦1,682", isPositive: true },
-    { id: "3", name: "Solana", ticker: "SOL", price: "$145.12", ngnPrice: "₦238k", change: "+5.32%", p2p: "₦1,640", isPositive: true },
-    { id: "4", name: "BNB", ticker: "BNB", price: "$590.45", ngnPrice: "₦971k", change: "-0.45%", p2p: "₦1,645", isPositive: false },
-    { id: "5", name: "XRP", ticker: "XRP", price: "$0.62", ngnPrice: "₦1,019", change: "+2.15%", p2p: "₦1,632", isPositive: true },
-    { id: "6", name: "Cardano", ticker: "ADA", price: "$0.45", ngnPrice: "₦740", change: "-1.12%", p2p: "₦1,640", isPositive: false },
-    { id: "7", name: "Toncoin", ticker: "TON", price: "$5.32", ngnPrice: "₦8,751", change: "+12.4%", p2p: "₦1,620", isPositive: true },
+const CRYPTO_DATA = [
+    { id: "1", name: "Bitcoin", ticker: "BTC", price: "$67,778.00", ngnPrice: "₦92.4M", change: "-2.39%", p2p: "₦1,400", isPositive: false },
+    { id: "2", name: "Ethereum", ticker: "ETH", price: "$1,964.34", ngnPrice: "₦2.68M", change: "-4.47%", p2p: "₦1,390", isPositive: false },
+    { id: "3", name: "Solana", ticker: "SOL", price: "$84.64", ngnPrice: "₦115k", change: "-4.40%", p2p: "₦1,380", isPositive: false },
+    { id: "4", name: "BNB", ticker: "BNB", price: "$630.71", ngnPrice: "₦860k", change: "-2.58%", p2p: "₦1,395", isPositive: false },
+    { id: "5", name: "XRP", ticker: "XRP", price: "$1.36", ngnPrice: "₦1,855", change: "-3.53%", p2p: "₦1,385", isPositive: false },
+    { id: "6", name: "Cardano", ticker: "ADA", price: "$0.2661", ngnPrice: "₦363", change: "-6.16%", p2p: "₦1,380", isPositive: false },
 ];
 
 export default function CryptoPage() {
@@ -53,7 +52,7 @@ export default function CryptoPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border-card/50">
-                                {MOCK_CRYPTO.map((coin) => (
+                                {CRYPTO_DATA.map((coin) => (
                                     <tr key={coin.id} className="group hover:bg-surface-2 transition-colors">
                                         <td className="py-6 px-4">
                                             <div className="flex items-center space-x-3">

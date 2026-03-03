@@ -24,7 +24,7 @@ export default function Footer() {
                             <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
                                 <Twitter className="w-5 h-5" />
                             </Link>
-                            <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                            <Link href="https://www.linkedin.com/company/korofinance" target="_blank" className="text-muted-foreground hover:text-primary transition-colors">
                                 <Linkedin className="w-5 h-5" />
                             </Link>
                             <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">

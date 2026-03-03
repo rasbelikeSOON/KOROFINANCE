@@ -19,10 +19,10 @@ export default function MarketsOverview() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                    { label: "NGX ASI", value: "104,256.81", change: "+1.2%", isUp: true },
-                    { label: "Market Cap", value: "₦58.2T", change: "+₦450B", isUp: true },
-                    { label: "Volume", value: "482.5M", change: "-12.4%", isUp: false },
-                    { label: "Deals", value: "12,452", change: "+842", isUp: true },
+                    { label: "NGX ASI", value: "103,482.16", change: "+0.8%", isUp: true },
+                    { label: "Market Cap", value: "₦56.7T", change: "+₦380B", isUp: true },
+                    { label: "Volume", value: "512.3M", change: "+8.2%", isUp: true },
+                    { label: "Deals", value: "11,845", change: "+624", isUp: true },
                 ].map((stat) => (
                     <div key={stat.label} className="glass p-6 rounded-md">
                         <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest mb-1">{stat.label}</p>
@@ -40,10 +40,10 @@ export default function MarketsOverview() {
                     <h3 className="text-xl font-display font-bold mb-6 italic uppercase tracking-tight">Active NGX Stocks</h3>
                     <div className="space-y-4">
                         {[
-                            { ticker: "ACCESSCORP", name: "Access Holdings", price: "₦24.50", change: "+2.1%" },
-                            { ticker: "UBA", name: "United Bank for Africa", price: "₦28.15", change: "+1.8%" },
-                            { ticker: "TRANSCORP", name: "Transcorp Group", price: "₦14.20", change: "-0.5%" },
-                            { ticker: "FBNH", name: "First Bank", price: "₦22.15", change: "-2.4%" },
+                            { ticker: "ACCESSCORP", name: "Access Holdings", price: "₦26.80", change: "+1.5%" },
+                            { ticker: "UBA", name: "United Bank for Africa", price: "₦32.10", change: "+2.3%" },
+                            { ticker: "TRANSCORP", name: "Transcorp Group", price: "₦18.45", change: "-0.8%" },
+                            { ticker: "FBNH", name: "First Bank", price: "₦25.50", change: "+1.1%" },
                         ].map((stock) => (
                             <div key={stock.ticker} className="flex items-center justify-between py-3 border-b border-border-card/50 last:border-0 hover:bg-surface-2 -mx-4 px-4 transition-colors">
                                 <div>
@@ -63,10 +63,10 @@ export default function MarketsOverview() {
                     <h3 className="text-xl font-display font-bold mb-6 italic uppercase tracking-tight">Top Crypto</h3>
                     <div className="space-y-4">
                         {[
-                            { ticker: "BTC", name: "Bitcoin", price: "$64,234", change: "+0.8%" },
-                            { ticker: "ETH", name: "Ethereum", price: "$3,456", change: "+1.2%" },
-                            { ticker: "SOL", name: "Solana", price: "$145", change: "+5.4%" },
-                            { ticker: "BNB", name: "Binance", price: "$590", change: "-0.4%" },
+                            { ticker: "BTC", name: "Bitcoin", price: "$67,778", change: "-2.39%" },
+                            { ticker: "ETH", name: "Ethereum", price: "$1,964", change: "-4.47%" },
+                            { ticker: "SOL", name: "Solana", price: "$84.64", change: "-4.40%" },
+                            { ticker: "BNB", name: "Binance", price: "$630.71", change: "-2.58%" },
                         ].map((coin) => (
                             <div key={coin.ticker} className="flex items-center justify-between py-3 border-b border-border-card/50 last:border-0 hover:bg-surface-2 -mx-4 px-4 transition-colors">
                                 <div>
