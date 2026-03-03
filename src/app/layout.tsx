@@ -19,8 +19,11 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Korofinance | Money's an Easy Thing",
-  description: "Real-time markets, breaking financial news, and plain-language explanations built for Nigerians and Africans.",
+  title: "Korofinance | Money, Decoded",
+  description: "Simplifying financial growth, real-time markets, and economy insights for every Nigerian.",
+  icons: {
+    icon: "/favicon-premium.png",
+  },
 };
 
 export default function RootLayout({

@@ -1,47 +1,12 @@
-"use client";
-
-import React from "react";
-import Link from "next/link";
-import { ArrowRight, Clock } from "lucide-react";
-
-const NEWS_DATA = [
-    {
-        id: 1,
-        category: "Policy",
-        title: "CBN Increases Interest Rates to 24.75% to Combat Inflation",
-        excerpt: "The Central Bank of Nigeria has announced a significant hike in the Monetary Policy Rate (MPR) in its latest move to stabilize the Naira and curb rising headline inflation.",
-        author: "Koro Editorial",
-        time: "2 hours ago",
-        readTime: "5 min read",
-        image: "https://images.unsplash.com/photo-1611974714652-17852e91dac7?q=80&w=2070&auto=format&fit=crop",
-        isHero: true,
-    },
-    {
-        id: 2,
-        category: "Crypto",
-        title: "Bitcoin Surges Past $64k as ETF Inflows Accelerate",
-        time: "4 hours ago",
-        isHero: false,
-    },
-    {
-        id: 3,
-        category: "NGX",
-        title: "MTN Nigeria Declares ₦2.4 Trillion Revenue for FY 2024",
-        time: "6 hours ago",
-        isHero: false,
-    },
-    {
-        id: 4,
-        category: "Fintech",
-        title: "Moniepoint Secures $100M Series C for Pan-African Expansion",
-        time: "8 hours ago",
-        isHero: false,
-    },
-];
+import useSWR from "swr";
+import { getLiveNews } from "@/lib/api/news";
+import { formatDistanceToNow } from "date-fns";
 
 export default function FeaturedNews() {
-    const heroArticle = NEWS_DATA.find((a) => a.isHero);
-    const sideArticles = NEWS_DATA.filter((a) => !a.isHero);
+    const { data: news, isLoading } = useSWR("live_news", getLiveNews);
+
+    const heroArticle = news && news.length > 0 ? news[0] : null;
+    const sideArticles = news && news.length > 1 ? news.slice(1, 4) : [];
 
     return (
         <section className="py-24 bg-background">
@@ -52,7 +17,7 @@ export default function FeaturedNews() {
                             Latest from the Markets
                         </h2>
                         <p className="text-muted-foreground font-mono text-sm uppercase tracking-widest">
-                            Real-time insights & reporting
+                            Money Simplified &bull; Real-time reporting
                         </p>
                     </div>
                     <Link
@@ -63,14 +28,19 @@ export default function FeaturedNews() {
                     </Link>
                 </div>
 
-                <div className="grid lg:grid-cols-12 gap-8">
-                    {/* Hero Article */}
-                    {heroArticle && (
+                {isLoading ? (
+                    <div className="flex flex-col items-center justify-center py-20">
+                        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4" />
+                        <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Syncing news terminal...</p>
+                    </div>
+                ) : heroArticle ? (
+                    <div className="grid lg:grid-cols-12 gap-8">
+                        {/* Hero Article */}
                         <div className="lg:col-span-7 group cursor-pointer">
-                            <Link href={`/news/${heroArticle.id}`}>
+                            <a href={heroArticle.url} target="_blank" rel="noopener noreferrer">
                                 <div className="relative aspect-[16/9] overflow-hidden rounded-md mb-6 grayscale hover:grayscale-0 transition-all duration-700">
                                     <img
-                                        src={heroArticle.image}
+                                        src={heroArticle.image_url}
                                         alt={heroArticle.title}
                                         className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700"
                                     />
@@ -84,45 +54,52 @@ export default function FeaturedNews() {
                                     {heroArticle.title}
                                 </h3>
                                 <p className="text-muted-foreground mb-6 line-clamp-2">
-                                    {heroArticle.excerpt}
+                                    {heroArticle.summary}
                                 </p>
                                 <div className="flex items-center text-xs font-mono text-muted-foreground space-x-4">
-                                    <span className="font-bold text-foreground uppercase tracking-widest">{heroArticle.author}</span>
-                                    <span className="flex items-center"><Clock className="w-3 h-3 mr-1" /> {heroArticle.time}</span>
-                                    <span>{heroArticle.readTime}</span>
+                                    <span className="font-bold text-foreground uppercase tracking-widest">{heroArticle.source}</span>
+                                    <span className="flex items-center">
+                                        <Clock className="w-3 h-3 mr-1" />
+                                        {formatDistanceToNow(new Date(heroArticle.published_at), { addSuffix: true })}
+                                    </span>
                                 </div>
-                            </Link>
+                            </a>
                         </div>
-                    )}
 
-                    {/* Side Articles */}
-                    <div className="lg:col-span-5 space-y-8">
-                        {sideArticles.map((article) => (
-                            <div key={article.id} className="group cursor-pointer border-b border-border-card/50 pb-8 last:border-0 last:pb-0">
-                                <Link href={`/news/${article.id}`}>
-                                    <span className="block text-[10px] font-mono font-bold text-primary uppercase tracking-widest mb-2">
-                                        {article.category}
-                                    </span>
-                                    <h4 className="text-xl font-display font-bold text-foreground group-hover:text-primary transition-colors leading-snug mb-3">
-                                        {article.title}
-                                    </h4>
-                                    <span className="flex items-center text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
-                                        <Clock className="w-3 h-3 mr-1 opacity-50" /> {article.time} · 3 min read
-                                    </span>
+                        {/* Side Articles */}
+                        <div className="lg:col-span-5 space-y-8">
+                            {sideArticles.map((article: any) => (
+                                <div key={article.id} className="group cursor-pointer border-b border-border-card/50 pb-8 last:border-0 last:pb-0">
+                                    <a href={article.url} target="_blank" rel="noopener noreferrer">
+                                        <span className="block text-[10px] font-mono font-bold text-primary uppercase tracking-widest mb-2">
+                                            {article.category}
+                                        </span>
+                                        <h4 className="text-xl font-display font-bold text-foreground group-hover:text-primary transition-colors leading-snug mb-3">
+                                            {article.title}
+                                        </h4>
+                                        <span className="flex items-center text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
+                                            <Clock className="w-3 h-3 mr-1 opacity-50" />
+                                            {formatDistanceToNow(new Date(article.published_at), { addSuffix: true })}
+                                        </span>
+                                    </a>
+                                </div>
+                            ))}
+
+                            <div className="pt-4">
+                                <Link
+                                    href="/news"
+                                    className="flex items-center justify-center w-full py-4 border border-border-card text-foreground font-bold rounded-sm hover:bg-surface transition-all"
+                                >
+                                    View all stories
                                 </Link>
                             </div>
-                        ))}
-
-                        <div className="pt-4">
-                            <Link
-                                href="/news"
-                                className="flex items-center justify-center w-full py-4 border border-border-card text-foreground font-bold rounded-sm hover:bg-surface transition-all"
-                            >
-                                View all stories
-                            </Link>
                         </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center py-20 border border-dashed border-border-card rounded-md">
+                        <p className="text-xs font-mono text-muted-foreground uppercase opacity-50">Terminal offline. Trigger news sync to see live reporting.</p>
+                    </div>
+                )}
             </div>
         </section>
     );

@@ -11,6 +11,9 @@
 [functions.refresh-market-data]
   schedule = "@daily"
 
+[functions.refresh-news]
+  schedule = "@daily"
+
 [[headers]]
   for = "/api/*"
   [headers.values]

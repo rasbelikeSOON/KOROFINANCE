@@ -27,11 +27,34 @@ CREATE TABLE IF NOT EXISTS profiles (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- 3. News Articles
+CREATE TABLE IF NOT EXISTS news_articles (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  summary TEXT,
+  content TEXT,
+  url TEXT UNIQUE NOT NULL,
+  image_url TEXT,
+  source TEXT,
+  category TEXT DEFAULT 'finance',
+  published_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Enable Row Level Security (RLS)
 ALTER TABLE market_cache ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE news_articles ENABLE ROW LEVEL SECURITY;
 
--- Create Policies
+-- Create Policies (Idempotent: Drops first if exists)
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON profiles;
 CREATE POLICY "Public profiles are viewable by everyone" ON profiles FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Users can update own profiles" ON profiles;
 CREATE POLICY "Users can update own profiles" ON profiles FOR UPDATE USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Market data is viewable by everyone" ON market_cache;
 CREATE POLICY "Market data is viewable by everyone" ON market_cache FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "News articles are viewable by everyone" ON news_articles;
+CREATE POLICY "News articles are viewable by everyone" ON news_articles FOR SELECT USING (true);

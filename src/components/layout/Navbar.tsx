@@ -23,8 +23,9 @@ export default function Navbar() {
                         <div className="w-8 h-8 bg-primary rounded-sm flex items-center justify-center font-display font-bold text-background transform group-hover:rotate-12 transition-transform">
                             ₦
                         </div>
-                        <span className="text-xl font-display font-bold tracking-tight text-foreground">
-                            KORO<span className="text-primary">FINANCE</span>
+                        <span className="text-xl font-display font-bold tracking-tight text-foreground flex flex-col leading-none">
+                            <span>KORO<span className="text-primary">FINANCE</span></span>
+                            <span className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest mt-0.5">Money Simplified</span>
                         </span>
                     </Link>
 

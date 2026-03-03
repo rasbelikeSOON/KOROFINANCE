@@ -22,11 +22,11 @@ export default function Hero() {
                             className="space-y-4"
                         >
                             <span className="text-primary font-mono text-sm font-bold tracking-[0.2em] uppercase">
-                                Africa&apos;s Financial Hub
+                                Money Simplified for Nigerians
                             </span>
                             <h1 className="text-6xl md:text-8xl font-display font-extrabold text-foreground leading-[1.05] tracking-tight">
-                                Money&apos;s an<br />
-                                <span className="text-primary">Easy Thing.</span>
+                                Money,<br />
+                                <span className="text-primary">Decoded.</span>
                             </h1>
                         </motion.div>
 
@@ -36,7 +36,7 @@ export default function Hero() {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="text-xl text-muted-foreground leading-relaxed max-w-2xl"
                         >
-                            Real-time markets, breaking financial news, and plain-language explanations built for Nigerians and Africans.
+                            We break through the noise to make investing, economy, and financial growth easy to understand for every Nigerian.
                         </motion.p>
 
                         <motion.div
