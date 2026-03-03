@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0A0C0F;
+  --color-foreground: #F0F2F5;
+  --color-surface: #111318;
+  --color-surface-2: #1A1D24;
+  --color-border-card: #1F2430;
+  --color-primary: #00E87A;
+  --color-success: #00E87A;
+  --color-destructive: #FF4848;
+  --color-warning: #F5C842;
+  --color-muted-foreground: #6B7280;
+
+  --font-display: var(--font-syne);
+  --font-sans: var(--font-instrument);
+  --font-mono: var(--font-mono);
+
+  --radius-lg: 1rem;
+  --radius-md: 0.75rem;
+  --radius-sm: 0.5rem;
+}
+
+:root {
+  --background: #0A0C0F;
+  --foreground: #F0F2F5;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-instrument), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: var(--font-syne), sans-serif;
+}
+
+.font-mono {
+  font-family: var(--font-mono), monospace;
+}
+
+/* Custom Utilities */
+.glass {
+  background: rgba(17, 19, 24, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid #1F2430;
+}
+
+.ticker-mask {
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
