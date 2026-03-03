@@ -1,6 +1,7 @@
 /**
  * Market Data API Implementation
  * - NGX Pulse (Nigerian Stocks) - 100 req/day free
+ * - iTick (Premium Nigerian Stocks) - 1000+ symbols, real-time
  * - CoinGecko (Crypto) - free, no key needed
  * - ExchangeRate-API (Forex) - 1500 req/month free
  */
@@ -24,6 +25,32 @@ export interface NGXMarketSummary {
 }
 
 const NGX_PULSE_KEY = process.env.NGX_PULSE_API_KEY;
+const ITICK_KEY = process.env.ITICK_API_KEY;
+
+// iTick (Premium Nigerian Stocks)
+export async function fetchITickStocks(tickers: string[]): Promise<MarketData[]> {
+    if (!ITICK_KEY) return [];
+    try {
+        // iTick supports batch quotes via comma-separated codes
+        const codes = tickers.join(",");
+        const res = await fetch(`https://api.itick.org/stock/quote?region=NG&token=${ITICK_KEY}&codes=${codes}`);
+        const data = await res.json();
+
+        if (!data.data) return [];
+
+        return data.data.map((stock: any) => ({
+            symbol: stock.code,
+            name: stock.name,
+            price: stock.price,
+            changePct: stock.change_percent,
+            volume: stock.volume,
+            sector: stock.sector,
+        }));
+    } catch (error) {
+        console.error("Error fetching iTick stocks:", error);
+        return [];
+    }
+}
 
 // NGX Pulse (Nigerian Stocks)
 export async function fetchNGXStocks(): Promise<MarketData[]> {

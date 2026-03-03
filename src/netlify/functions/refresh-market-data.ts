@@ -1,10 +1,9 @@
 import { supabase } from "../../lib/supabase";
-import { fetchCryptoData, fetchForexRate, fetchNGXStocks } from "../../lib/api/market";
+import { fetchCryptoData, fetchForexRate, fetchNGXStocks, fetchITickStocks } from "../../lib/api/market";
 
 /**
  * Netlify Scheduled Function
  * Runs daily to refresh market data from all sources.
- * Uses only ~4 API calls per run (NGX Pulse, CoinGecko x2, ExchangeRate-API).
  */
 export async function handler(event: any, context: any) {
     console.log("Refreshing market data...");
@@ -12,15 +11,36 @@ export async function handler(event: any, context: any) {
     try {
         const results: any[] = [];
 
-        // 1. Fetch ALL NGX Stocks in one call via NGX Pulse
+        // 1. Fetch Master List from NGX Pulse
         const ngxStocks = await fetchNGXStocks();
-        for (const stock of ngxStocks) {
+        let finalNgxData = ngxStocks;
+
+        // 2. Enrich with iTick Premium Data if key is available
+        const itickKey = process.env.ITICK_API_KEY;
+        if (itickKey && ngxStocks.length > 0) {
+            console.log("Enriching with iTick Premium data...");
+            const tickers = ngxStocks.map(s => s.symbol);
+            // iTick batch limit is usually 50-100, we chunk it if necessary
+            // For now, we fetch the top 100 to stay within limits/performance
+            const premiumData = await fetchITickStocks(tickers.slice(0, 100));
+
+            if (premiumData.length > 0) {
+                // Map premium data back to the master list
+                finalNgxData = ngxStocks.map(stock => {
+                    const premium = premiumData.find(p => p.symbol === stock.symbol);
+                    return premium ? { ...stock, price: premium.price, changePct: premium.changePct } : stock;
+                });
+            }
+        }
+
+        for (const stock of finalNgxData) {
             results.push({
                 ticker: stock.symbol,
                 name: stock.name,
                 price: stock.price,
                 change_pct: stock.changePct,
                 volume: stock.volume,
+                sector: stock.sector,
                 market: "ngx",
             });
         }
