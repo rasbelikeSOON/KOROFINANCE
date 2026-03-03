@@ -1,33 +1,41 @@
 import { supabase } from "../../lib/supabase";
-import { fetchCryptoData, fetchForexRate, fetchStockData } from "../../lib/api/market";
+import { fetchCryptoData, fetchForexRate, fetchNGXStocks } from "../../lib/api/market";
 
 /**
  * Netlify Scheduled Function
- * Runs every 5 minutes to refresh market data.
+ * Runs daily to refresh market data from all sources.
+ * Uses only ~4 API calls per run (NGX Pulse, CoinGecko x2, ExchangeRate-API).
  */
 export async function handler(event: any, context: any) {
     console.log("Refreshing market data...");
 
     try {
-        const results = [];
+        const results: any[] = [];
 
-        // 1. Fetch Crypto (BTC/ETH)
+        // 1. Fetch ALL NGX Stocks in one call via NGX Pulse
+        const ngxStocks = await fetchNGXStocks();
+        for (const stock of ngxStocks) {
+            results.push({
+                ticker: stock.symbol,
+                name: stock.name,
+                price: stock.price,
+                change_pct: stock.changePct,
+                volume: stock.volume,
+                market: "ngx",
+            });
+        }
+        console.log(`Fetched ${ngxStocks.length} NGX stocks`);
+
+        // 2. Fetch Crypto (BTC/ETH)
         const btc = await fetchCryptoData("bitcoin");
-        if (btc) results.push({ ticker: "BTC", price: btc.price, change_pct: btc.changePct, market: "crypto" });
+        if (btc) results.push({ ticker: "BTC", name: "Bitcoin", price: btc.price, change_pct: btc.changePct, market: "crypto" });
 
         const eth = await fetchCryptoData("ethereum");
-        if (eth) results.push({ ticker: "ETH", price: eth.price, change_pct: eth.changePct, market: "crypto" });
+        if (eth) results.push({ ticker: "ETH", name: "Ethereum", price: eth.price, change_pct: eth.changePct, market: "crypto" });
 
-        // 2. Fetch Forex (USD/NGN)
+        // 3. Fetch Forex (USD/NGN)
         const usdNgn = await fetchForexRate("USD", "NGN");
-        if (usdNgn) results.push({ ticker: "USD/NGN", price: usdNgn, market: "forex" });
-
-        // 3. Fetch NGX Stocks (Sample)
-        const dangcem = await fetchStockData("DANGCEM.LAG");
-        if (dangcem) results.push({ ticker: "DANGCEM", price: dangcem.price, change_pct: dangcem.changePct, market: "ngx" });
-
-        const mtnn = await fetchStockData("MTNN.LAG");
-        if (mtnn) results.push({ ticker: "MTNN", price: mtnn.price, change_pct: mtnn.changePct, market: "ngx" });
+        if (usdNgn) results.push({ ticker: "USD/NGN", name: "US Dollar / Naira", price: usdNgn, change_pct: 0, market: "forex" });
 
         // 4. Upsert into Supabase `market_cache` table
         if (results.length > 0) {
@@ -42,7 +50,12 @@ export async function handler(event: any, context: any) {
             statusCode: 200,
             body: JSON.stringify({
                 message: "Market data refreshed successfully",
-                assetsUpdated: results.length
+                assetsUpdated: results.length,
+                breakdown: {
+                    ngx: ngxStocks.length,
+                    crypto: [btc, eth].filter(Boolean).length,
+                    forex: usdNgn ? 1 : 0,
+                },
             }),
         };
     } catch (error: any) {

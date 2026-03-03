@@ -1,40 +1,76 @@
 /**
  * Market Data API Implementation
+ * - NGX Pulse (Nigerian Stocks) - 100 req/day free
+ * - CoinGecko (Crypto) - free, no key needed
+ * - ExchangeRate-API (Forex) - 1500 req/month free
  */
 
 export interface MarketData {
     symbol: string;
+    name?: string;
     price: number;
     changePct: number;
     volume?: number;
+    sector?: string;
 }
 
-const ALPHA_VANTAGE_KEY = process.env.ALPHA_VANTAGE_API_KEY;
+export interface NGXMarketSummary {
+    asi: number;
+    marketCap: number;
+    volume: number;
+    advancers: number;
+    decliners: number;
+    unchanged: number;
+}
 
-// Alpha Vantage (Forex/Stocks)
-export async function fetchStockData(symbol: string): Promise<MarketData | null> {
+const NGX_PULSE_KEY = process.env.NGX_PULSE_API_KEY;
+
+// NGX Pulse (Nigerian Stocks)
+export async function fetchNGXStocks(): Promise<MarketData[]> {
     try {
-        const res = await fetch(
-            `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${ALPHA_VANTAGE_KEY}`
-        );
+        const res = await fetch("https://ngxpulse.ng/api/ngxdata/stocks", {
+            headers: { "x-api-key": NGX_PULSE_KEY || "" },
+        });
         const data = await res.json();
-        const quote = data["Global Quote"];
 
-        if (!quote) return null;
+        if (!data.stocks) return [];
 
+        return data.stocks.map((stock: any) => ({
+            symbol: stock.symbol,
+            name: stock.name,
+            price: stock.current_price,
+            changePct: stock.change_percent,
+            volume: stock.volume,
+            sector: stock.sector,
+        }));
+    } catch (error) {
+        console.error("Error fetching NGX stocks:", error);
+        return [];
+    }
+}
+
+// NGX Pulse (Market Summary)
+export async function fetchNGXMarketSummary(): Promise<NGXMarketSummary | null> {
+    try {
+        const res = await fetch("https://ngxpulse.ng/api/ngxdata/market", {
+            headers: { "x-api-key": NGX_PULSE_KEY || "" },
+        });
+        const data = await res.json();
         return {
-            symbol: quote["01. symbol"],
-            price: parseFloat(quote["05. price"]),
-            changePct: parseFloat(quote["10. change percent"]?.replace("%", "") || "0"),
-            volume: parseInt(quote["06. volume"]),
+            asi: data.asi,
+            marketCap: data.market_cap,
+            volume: data.volume,
+            advancers: data.advancers,
+            decliners: data.decliners,
+            unchanged: data.unchanged,
         };
     } catch (error) {
-        console.error(`Error fetching stock ${symbol}:`, error);
+        console.error("Error fetching NGX market summary:", error);
         return null;
     }
 }
 
-// CoinGecko (Crypto)
+// CoinGecko (Crypto) — Free, no key needed
 export async function fetchCryptoData(coinId: string): Promise<MarketData | null> {
     try {
         const res = await fetch(
