@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
     try {
@@ -19,6 +22,30 @@ export async function POST(req: Request) {
                 return NextResponse.json({ error: "This email is already subscribed." }, { status: 400 });
             }
             throw error;
+        }
+
+        // Send Welcome Email via Resend
+        try {
+            await resend.emails.send({
+                from: "Koro Finance <onboarding@resend.dev>", // Note: Use your verified domain in production
+                to: email,
+                subject: "Welcome to the Koro Brief! 📈",
+                html: `
+                    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a;">
+                        <h1 style="color: #00ff88; text-transform: uppercase;">Welcome to the Terminal.</h1>
+                        <p>Thanks for subscribing to the <strong>Koro Brief</strong>.</p>
+                        <p>You'll now receive weekly insights into the Nigerian Exchange (NGX), Crypto markets, and African financial policy, delivered straight to your inbox.</p>
+                        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+                        <p style="font-size: 12px; color: #666;">
+                            Money's an easy thing. <br />
+                            © 2026 Korofinance
+                        </p>
+                    </div>
+                `,
+            });
+        } catch (emailError) {
+            console.error("Resend welcome email failed:", emailError);
+            // We don't fail the subscription if the welcome email fails
         }
 
         return NextResponse.json({ success: true, message: "Successfully subscribed!" });

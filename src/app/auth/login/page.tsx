@@ -1,10 +1,54 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Mail, Lock, Github, Chrome } from "lucide-react";
+import { ArrowLeft, Mail, Lock, Github, Chrome, Loader2, AlertCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+    const router = useRouter();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (signInError) throw signInError;
+
+            router.push("/markets");
+            router.refresh();
+        } catch (err: any) {
+            setError(err.message || "Failed to sign in. Please check your credentials.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGoogleLogin = async () => {
+        try {
+            const { error: googleError } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/auth/callback`,
+                }
+            });
+            if (googleError) throw googleError;
+        } catch (err: any) {
+            setError(err.message || "Failed to sign in with Google.");
+        }
+    };
+
     return (
         <div className="min-h-screen flex flex-col lg:flex-row bg-background">
             {/* Left Side: Brand/Aesthetic */}
@@ -39,7 +83,11 @@ export default function LoginPage() {
                     </div>
 
                     <div className="space-y-4">
-                        <button className="w-full py-4 bg-surface border border-border-card rounded-sm flex items-center justify-center space-x-3 hover:bg-surface-2 transition-colors group">
+                        <button
+                            onClick={handleGoogleLogin}
+                            disabled={loading}
+                            className="w-full py-4 bg-surface border border-border-card rounded-sm flex items-center justify-center space-x-3 hover:bg-surface-2 transition-colors group disabled:opacity-50"
+                        >
                             <Chrome className="w-5 h-5 group-hover:text-primary transition-colors" />
                             <span className="text-sm font-bold uppercase tracking-widest">Continue with Google</span>
                         </button>
@@ -50,13 +98,23 @@ export default function LoginPage() {
                             <div className="flex-grow border-t border-border-card" />
                         </div>
 
-                        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                        {error && (
+                            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-sm flex items-center space-x-3 text-destructive text-sm font-mono">
+                                <AlertCircle className="w-4 h-4" />
+                                <span>{error}</span>
+                            </div>
+                        )}
+
+                        <form className="space-y-6" onSubmit={handleLogin}>
                             <div className="space-y-4">
                                 <div className="relative">
                                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                     <input
                                         type="email"
                                         placeholder="Email Address"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
                                         className="w-full bg-surface border border-border-card p-4 pl-12 rounded-sm text-sm focus:outline-none focus:border-primary transition-colors font-mono"
                                     />
                                 </div>
@@ -65,13 +123,20 @@ export default function LoginPage() {
                                     <input
                                         type="password"
                                         placeholder="Password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
                                         className="w-full bg-surface border border-border-card p-4 pl-12 rounded-sm text-sm focus:outline-none focus:border-primary transition-colors font-mono"
                                     />
                                 </div>
                             </div>
 
-                            <button className="w-full py-4 bg-primary text-background font-bold rounded-sm uppercase tracking-widest hover:bg-primary/90 transition-all">
-                                Enter Dashboard
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full py-4 bg-primary text-background font-bold rounded-sm uppercase tracking-widest hover:bg-primary/90 transition-all flex items-center justify-center disabled:opacity-50"
+                            >
+                                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Enter Dashboard"}
                             </button>
                         </form>
                     </div>
