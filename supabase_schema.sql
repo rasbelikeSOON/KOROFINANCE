@@ -56,5 +56,17 @@ CREATE POLICY "Users can update own profiles" ON profiles FOR UPDATE USING (auth
 DROP POLICY IF EXISTS "Market data is viewable by everyone" ON market_cache;
 CREATE POLICY "Market data is viewable by everyone" ON market_cache FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Allow insertions into market_cache" ON market_cache;
+CREATE POLICY "Allow insertions into market_cache" ON market_cache FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow updates into market_cache" ON market_cache;
+CREATE POLICY "Allow updates into market_cache" ON market_cache FOR UPDATE USING (true) WITH CHECK (true);
+
 DROP POLICY IF EXISTS "News articles are viewable by everyone" ON news_articles;
 CREATE POLICY "News articles are viewable by everyone" ON news_articles FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow insertions into news_articles" ON news_articles;
+CREATE POLICY "Allow insertions into news_articles" ON news_articles FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow updates into news_articles" ON news_articles;
+CREATE POLICY "Allow updates into news_articles" ON news_articles FOR UPDATE USING (true) WITH CHECK (true);
