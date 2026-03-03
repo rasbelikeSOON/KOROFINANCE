@@ -1,51 +1,36 @@
 "use client";
 
-import React from "react";
-import { BookOpen, Search, Filter, TrendingUp, Layers, Zap, Info } from "lucide-react";
+import { BookOpen, Search, Filter, TrendingUp, Layers, Zap, Info, Loader2 } from "lucide-react";
 import Link from "next/link";
+import useSWR from "swr";
+import { supabase } from "@/lib/supabase";
 
 const CATEGORIES = ["Investing", "Savings", "Policy & CBN", "Crypto", "Forex", "Macroeconomics", "Personal Finance"];
 
-const CONCEPTS = [
-    {
-        id: "stock-market-basics",
-        title: "Stock Market Basics",
-        category: "Investing",
-        difficulty: "Beginner",
-        excerpt: "Learn how the Nigerian Exchange (NGX) works and how to buy your first share in a dividend-paying company.",
-        icon: <BookOpen className="w-6 h-6 text-primary" />,
-        readTime: "4 mins",
-    },
-    {
-        id: "inflation-explained",
-        title: "Understanding Inflation",
-        category: "Macroeconomics",
-        difficulty: "Intermediate",
-        excerpt: "A plain-language guide on why the purchasing power of the Naira changes and how it impacts your daily spending.",
-        icon: <Zap className="w-6 h-6 text-warning" />,
-        readTime: "6 mins",
-    },
-    {
-        id: "treasury-bills-101",
-        title: "Treasury Bills & Bonds",
-        category: "Savings",
-        difficulty: "Beginner",
-        excerpt: "Safe, steady, and backed by the Federal Government. Everything you need to know about investing in T-bills.",
-        icon: <Layers className="w-6 h-6 text-primary" />,
-        readTime: "5 mins",
-    },
-    {
-        id: "cryptocurrency-wallets",
-        title: "How Crypto Wallets Work",
-        category: "Crypto",
-        difficulty: "Intermediate",
-        excerpt: "Hot vs Cold storage. Learn how to secure your digital assets in the Nigerian context without getting scammed.",
-        icon: <Info className="w-6 h-6 text-indigo-400" />,
-        readTime: "8 mins",
-    },
-];
+const fetchLearnArticles = async () => {
+    const { data, error } = await supabase
+        .from("learn_articles")
+        .select("*")
+        .order("published_at", { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+};
+
+const renderIcon = (iconName: string, className: string) => {
+    switch (iconName) {
+        case 'Zap': return <Zap className={className} />;
+        case 'Layers': return <Layers className={className} />;
+        case 'Info': return <Info className={className} />;
+        case 'BookOpen':
+        default:
+            return <BookOpen className={className} />;
+    }
+};
 
 export default function LearnPage() {
+    const { data: articles, isLoading } = useSWR("learn_articles", fetchLearnArticles);
+
     return (
         <div className="min-h-screen pt-20 pb-24 bg-background">
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -78,31 +63,47 @@ export default function LearnPage() {
                     </div>
                 </header>
 
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {CONCEPTS.map((concept) => (
-                        <Link key={concept.id} href={`/learn/${concept.id}`}>
-                            <div className="glass p-8 rounded-md group hover:border-primary/50 transition-all border-l-4 border-l-transparent hover:border-l-primary h-full flex flex-col">
-                                <div className="mb-8 p-3 w-fit bg-surface-2 rounded-sm">{concept.icon}</div>
-                                <div className="flex items-center justify-between mb-4">
-                                    <span className={`px-2 py-1 rounded-sm text-[10px] font-bold uppercase tracking-widest ${concept.difficulty === "Beginner" ? "bg-primary/10 text-primary" : "bg-warning/10 text-warning"
-                                        }`}>
-                                        {concept.difficulty}
-                                    </span>
-                                    <span className="text-[10px] font-mono text-muted-foreground uppercase">{concept.readTime}</span>
+                {isLoading ? (
+                    <div className="flex justify-center py-20">
+                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    </div>
+                ) : articles && articles.length > 0 ? (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {articles.map((article: any) => (
+                            <Link key={article.id} href={`/learn/${article.slug}`}>
+                                <div className="glass p-8 rounded-md group hover:border-primary/50 transition-all border-l-4 border-l-transparent hover:border-l-primary h-full flex flex-col">
+                                    <div className="mb-8 p-3 w-fit bg-surface-2 rounded-sm">
+                                        {renderIcon(article.icon_name, `w-6 h-6 ${article.difficulty === 'Beginner' ? 'text-primary' : article.difficulty === 'Intermediate' ? 'text-warning' : 'text-destructive'}`)}
+                                    </div>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <span className={`px-2 py-1 rounded-sm text-[10px] font-bold uppercase tracking-widest ${article.difficulty === "Beginner" ? "bg-primary/10 text-primary" : article.difficulty === "Intermediate" ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"
+                                            }`}>
+                                            {article.difficulty}
+                                        </span>
+                                        <span className="text-[10px] font-mono text-muted-foreground uppercase">{article.read_time || "5 mins"}</span>
+                                    </div>
+                                    <h3 className="text-2xl font-display font-bold text-foreground mb-4 group-hover:text-primary transition-colors leading-tight">
+                                        {article.title}
+                                    </h3>
+                                    <p className="text-muted-foreground/80 text-sm leading-relaxed mb-8 flex-grow line-clamp-3">
+                                        {article.excerpt}
+                                    </p>
+                                    <div className="pt-6 border-t border-border-card/50 flex items-center text-primary font-bold text-xs uppercase tracking-widest">
+                                        Start Reading <TrendingUp className="w-3 h-3 ml-2" />
+                                    </div>
                                 </div>
-                                <h3 className="text-2xl font-display font-bold text-foreground mb-4 group-hover:text-primary transition-colors leading-tight">
-                                    {concept.title}
-                                </h3>
-                                <p className="text-muted-foreground/80 text-sm leading-relaxed mb-8 flex-grow">
-                                    {concept.excerpt}
-                                </p>
-                                <div className="pt-6 border-t border-border-card/50 flex items-center text-primary font-bold text-xs uppercase tracking-widest">
-                                    Start Reading <TrendingUp className="w-3 h-3 ml-2" />
-                                </div>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
+                            </Link>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center py-32 border border-dashed border-border-card rounded-md">
+                        <BookOpen className="w-8 h-8 text-muted-foreground mb-4" />
+                        <h3 className="text-xl font-display font-bold text-foreground mb-2">Knowledge Base Updating</h3>
+                        <p className="text-muted-foreground text-center max-w-sm">
+                            New educational modules are currently being curated by our editorial team. Check back shortly.
+                        </p>
+                    </div>
+                )}
 
                 {/* Learning Paths Teaser */}
                 <section className="mt-24 bg-surface p-12 rounded-md relative overflow-hidden">

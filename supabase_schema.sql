@@ -101,3 +101,28 @@ ALTER TABLE watchlists ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Users can manage own watchlists" ON watchlists;
 CREATE POLICY "Users can manage own watchlists" ON watchlists FOR ALL USING (auth.uid() = user_id);
+
+-- 6. Learn Articles (Educational Content)
+CREATE TABLE IF NOT EXISTS learn_articles (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  slug TEXT UNIQUE NOT NULL,
+  title TEXT NOT NULL,
+  category TEXT NOT NULL,
+  difficulty TEXT NOT NULL, -- 'Beginner', 'Intermediate', 'Advanced'
+  excerpt TEXT NOT NULL,
+  content TEXT NOT NULL,
+  read_time TEXT,
+  icon_name TEXT, -- String representation of lucide icon name (e.g., 'BookOpen', 'Zap')
+  published_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE learn_articles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Learn articles are viewable by everyone" ON learn_articles;
+CREATE POLICY "Learn articles are viewable by everyone" ON learn_articles FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow insertions into learn_articles" ON learn_articles;
+CREATE POLICY "Allow insertions into learn_articles" ON learn_articles FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow updates into learn_articles" ON learn_articles;
+CREATE POLICY "Allow updates into learn_articles" ON learn_articles FOR UPDATE USING (true) WITH CHECK (true);
