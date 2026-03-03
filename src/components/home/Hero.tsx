@@ -2,8 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
-import { TrendingUp, ArrowRight } from "lucide-react";
+import { TrendingUp, ArrowRight, Zap } from "lucide-react";
 import { motion } from "framer-motion";
+import useSWR from "swr";
+import { getLiveNews } from "@/lib/api/news";
 
 export default function Hero() {
     return (
@@ -59,6 +61,8 @@ export default function Hero() {
                                 Start Learning
                             </Link>
                         </motion.div>
+
+                        <TrendingNewsStack />
 
                         {/* Trust Indicators */}
                         <motion.div
@@ -151,5 +155,45 @@ export default function Hero() {
                 </div>
             </div>
         </section>
+    );
+}
+
+function TrendingNewsStack() {
+    const { data: news, isLoading } = useSWR("hero_trending_news", () => getLiveNews(3));
+
+    return (
+        <div className="pt-8 max-w-md">
+            <div className="flex items-center space-x-2 mb-4">
+                <Zap className="w-3 h-3 text-primary" />
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground">Trending Now</span>
+            </div>
+            <div className="space-y-3">
+                {isLoading ? (
+                    [1, 2, 3].map((i) => (
+                        <div key={i} className="h-10 bg-surface-2 animate-pulse rounded-sm" />
+                    ))
+                ) : (
+                    news?.map((item, i) => (
+                        <motion.div
+                            key={item.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.4, delay: 0.6 + i * 0.1, ease: [0.4, 0, 0.2, 1] }}
+                        >
+                            <Link
+                                href={item.url}
+                                target="_blank"
+                                className="group flex items-center p-3 bg-surface/50 border border-border-card/50 rounded-sm hover:border-primary/30 transition-all hover:bg-surface"
+                            >
+                                <span className="text-[10px] font-mono text-primary font-bold mr-3">0{i + 1}</span>
+                                <p className="text-xs font-bold text-foreground/80 line-clamp-1 group-hover:text-primary transition-colors">
+                                    {item.title}
+                                </p>
+                            </Link>
+                        </motion.div>
+                    ))
+                )}
+            </div>
+        </div>
     );
 }
