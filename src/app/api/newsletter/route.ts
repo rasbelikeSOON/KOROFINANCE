@@ -26,7 +26,8 @@ export async function POST(req: Request) {
 
         // Send Welcome Email via Resend
         try {
-            await resend.emails.send({
+            console.log(`Attempting to send welcome email to: ${email}`);
+            const { data, error: emailError } = await resend.emails.send({
                 from: "Koro Finance <onboarding@resend.dev>", // Note: Use your verified domain in production
                 to: email,
                 subject: "Welcome to the Koro Brief! 📈",
@@ -43,9 +44,14 @@ export async function POST(req: Request) {
                     </div>
                 `,
             });
-        } catch (emailError) {
-            console.error("Resend welcome email failed:", emailError);
-            // We don't fail the subscription if the welcome email fails
+
+            if (emailError) {
+                console.error("Resend API error:", emailError);
+            } else {
+                console.log("Welcome email sent successfully:", data?.id);
+            }
+        } catch (err: any) {
+            console.error("Resend execution error:", err.message);
         }
 
         return NextResponse.json({ success: true, message: "Successfully subscribed!" });
