@@ -28,7 +28,7 @@ export async function POST(req: Request) {
         try {
             console.log(`Attempting to send welcome email to: ${email}`);
             const { data, error: emailError } = await resend.emails.send({
-                from: "Koro Finance <onboarding@resend.dev>", // Note: Use your verified domain in production
+                from: "KoroFinance <hello@korofinance.com>", // Ready once domain is verified
                 to: email,
                 subject: "Welcome to the Koro Brief! 📈",
                 html: `
