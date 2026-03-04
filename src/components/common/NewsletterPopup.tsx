@@ -28,37 +28,13 @@ export default function NewsletterPopup() {
         localStorage.setItem("koro_newsletter_popup_seen", "true");
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!email) return;
-
-        setStatus("loading");
-        setMessage("");
-
-        try {
-            const res = await fetch("/api/newsletter", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email }),
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) throw new Error(data.error || "Something went wrong");
-
-            setStatus("success");
-            setMessage("You're in! Welcome to Koro Finance.");
-            localStorage.setItem("koro_newsletter_popup_seen", "true");
-
-            // Auto close after success
-            setTimeout(() => {
-                setIsOpen(false);
-            }, 3000);
-        } catch (err: any) {
-            setStatus("error");
-            setMessage(err.message);
-        }
+    const handleSubmit = (e: React.FormEvent) => {
+        setStatus("success");
+        setMessage("Redirecting to finalize...");
+        setTimeout(() => setIsOpen(false), 3000);
     };
+
+    const pubId = process.env.NEXT_PUBLIC_BEEHIIV_PUB_ID;
 
     return (
         <AnimatePresence>
@@ -99,26 +75,30 @@ export default function NewsletterPopup() {
                                 </p>
                             </div>
 
-                            <form onSubmit={handleSubmit} className="space-y-4">
+                            <form
+                                action="https://app.beehiiv.com/ad-sub"
+                                method="POST"
+                                target="_blank"
+                                onSubmit={handleSubmit}
+                                className="space-y-4"
+                            >
+                                <input type="hidden" name="pub_id" value={pubId} />
                                 <div className="relative group">
                                     <input
                                         type="email"
+                                        name="email"
                                         placeholder="Enter your email address"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        disabled={status === "loading" || status === "success"}
                                         required
                                         className="w-full bg-surface-2 border border-border-card px-5 py-4 rounded-sm text-foreground focus:outline-none focus:border-primary transition-colors font-mono disabled:opacity-50"
                                     />
                                 </div>
                                 <button
                                     type="submit"
-                                    disabled={status === "loading" || status === "success"}
-                                    className="w-full py-4 bg-primary text-background font-bold rounded-sm flex items-center justify-center hover:bg-primary/90 transition-all active:scale-[0.98] group disabled:opacity-50 disabled:pointer-events-none"
+                                    className="w-full py-4 bg-primary text-background font-bold rounded-sm flex items-center justify-center hover:bg-primary/90 transition-all active:scale-[0.98] group disabled:opacity-50"
                                 >
-                                    {status === "loading" ? (
-                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                    ) : status === "success" ? (
+                                    {status === "success" ? (
                                         <>
                                             <CheckCircle2 className="w-5 h-5 mr-2" />
                                             Subscribed successfully
