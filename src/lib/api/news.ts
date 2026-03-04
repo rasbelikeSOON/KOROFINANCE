@@ -30,7 +30,18 @@ const EXCLUDED_KEYWORDS = [
     "football", "soccer", "match", "goal", "league", "sports", "tournament",
     "fifa", "caf", "nff", "super eagles", "chelsea", "arsenal", "manchester",
     "liverpool", "real madrid", "barcelona", "sport", "epl", "premier league",
-    "olympic", "athletics", "tenis", "basketball", "nba", "wolves", "stun"
+    "olympic", "athletics", "tenis", "basketball", "nba", "wolves", "stun",
+    "movie", "nollywood", "hollywood", "music", "song", "album", "concert"
+];
+
+const INCLUDED_KEYWORDS = [
+    "finance", "fintech", "market", "economy", "bank", "naira", "cbn",
+    "stock", "share", "investment", "investor", "crypto", "bitcoin", "ethereum",
+    "blockchain", "policy", "government", "revenue", "tax", "gdp", "inflation",
+    "fx", "forex", "exchange rate", "startup", "funding", "capital", "trade",
+    "export", "import", "debt", "subsidy", "bonds", "treasury", "dividend",
+    "earnings", "profit", "loss", "infrastructure", "telecom", "energy", "oil",
+    "gas", "dangote", "bua", "mtn", "airtel", "seplat", "ngx"
 ];
 
 export async function fetchExternalNews() {
@@ -65,13 +76,19 @@ export async function fetchExternalNews() {
                 const title = post.title.rendered.replace(/&#8217;/g, "'").replace(/&#8211;/g, "-");
                 const summary = post.excerpt.rendered.replace(/<[^>]*>?/gm, '').slice(0, 200) + "...";
 
-                // Filter out articles with sports keywords
+                // Filter out articles with sports/entertainment keywords
                 const isIrrelevant = EXCLUDED_KEYWORDS.some(keyword =>
                     title.toLowerCase().includes(keyword) ||
                     summary.toLowerCase().includes(keyword)
                 );
 
-                if (isIrrelevant) continue;
+                // Require at least one finance/market keyword
+                const isRelevant = INCLUDED_KEYWORDS.some(keyword =>
+                    title.toLowerCase().includes(keyword) ||
+                    summary.toLowerCase().includes(keyword)
+                );
+
+                if (isIrrelevant || !isRelevant) continue;
 
                 allArticles.push({
                     title,

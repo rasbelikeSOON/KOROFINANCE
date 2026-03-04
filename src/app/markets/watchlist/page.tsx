@@ -9,51 +9,56 @@ import SaveButton from "@/components/markets/SaveButton";
 
 export default function WatchlistPage() {
     const router = useRouter();
-    const [user, setUser] = useState<any>(null);
+    const [savedTickers, setSavedTickers] = useState<string[]>([]);
+    const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
-        supabase.auth.getUser().then(({ data }) => {
-            if (!data.user) {
-                router.push("/auth/login");
-            } else {
-                setUser(data.user);
+        setIsClient(true);
+        const stored = localStorage.getItem("korofinance_watchlist");
+        if (stored) {
+            try {
+                const parsed = JSON.parse(stored);
+                const tickers = parsed.map((item: any) => item.ticker || item);
+                setSavedTickers(tickers);
+            } catch (e) {
+                console.error("Failed to parse watchlist", e);
             }
-        });
-    }, [router]);
+        }
+
+        // Listen for changes from SaveButton
+        const handleStorageChange = () => {
+            const updated = localStorage.getItem("korofinance_watchlist");
+            if (updated) {
+                try {
+                    const parsed = JSON.parse(updated);
+                    setSavedTickers(parsed.map((item: any) => item.ticker || item));
+                } catch (e) { }
+            } else {
+                setSavedTickers([]);
+            }
+        };
+
+        window.addEventListener("watchlist_updated", handleStorageChange);
+        return () => window.removeEventListener("watchlist_updated", handleStorageChange);
+    }, []);
 
     const fetchWatchlistData = async () => {
-        if (!user) return [];
-        // Get user watchlist
-        const { data: watchlist, error } = await supabase
-            .from("watchlists")
-            .select("ticker, market")
-            .eq("user_id", user.id);
-
-        if (error || !watchlist || watchlist.length === 0) return [];
-
-        const tickers = watchlist.map(w => w.ticker);
+        if (savedTickers.length === 0) return [];
 
         // Fetch corresponding market data
         const { data: marketData, error: mError } = await supabase
             .from("market_cache")
             .select("*")
-            .in("ticker", tickers)
+            .in("ticker", savedTickers)
             .order("price", { ascending: false });
 
         if (mError) throw mError;
         return marketData || [];
     };
 
-    const { data: savedAssets, isLoading } = useSWR(user ? `watchlist_data_${user.id}` : null, fetchWatchlistData);
+    const { data: savedAssets, isLoading } = useSWR(savedTickers.length > 0 ? `watchlist_data_${savedTickers.join("_")}` : null, fetchWatchlistData);
 
-    if (!user) {
-        return (
-            <div className="flex flex-col items-center justify-center py-32 space-y-4">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <p className="text-muted-foreground font-mono text-xs uppercase">Attempting authentication...</p>
-            </div>
-        );
-    }
+    if (!isClient) return null;
 
     return (
         <div className="space-y-8">
