@@ -183,3 +183,111 @@ export async function getLiveNews(limit: number = 10) {
     if (error) throw error;
     return data || [];
 }
+
+interface RawHeadline {
+    title: string;
+    summary: string;
+    source: string;
+    category: string;
+    image_url: string;
+}
+
+export async function detectTrendingTopics(): Promise<{ topics: { headlines: string[]; summaries: string[]; category: string; sources: string[]; image_url: string }[] }> {
+    const allHeadlines: RawHeadline[] = [];
+
+    for (const source of SOURCES) {
+        try {
+            console.log(`Scanning ${source.name} for trending topics...`);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+            const response = await fetch(source.api, {
+                cache: 'no-store',
+                signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                console.error(`Status ${response.status} from ${source.name}`);
+                continue;
+            }
+
+            const posts = await response.json();
+
+            for (const post of posts) {
+                const imageUrl = post._embedded?.['wp:featuredmedia']?.[0]?.source_url ||
+                    "https://images.unsplash.com/photo-1611974714652-17852e91dac7?q=80&w=2070&auto=format&fit=crop";
+
+                const title = post.title.rendered
+                    .replace(/&#8217;/g, "'").replace(/&#8211;/g, "-")
+                    .replace(/&#8216;/g, "'").replace(/&#8220;/g, '"')
+                    .replace(/&#8221;/g, '"').replace(/&amp;/g, "&")
+                    .replace(/&#8230;/g, "...").replace(/<[^>]*>?/gm, '');
+
+                const summary = post.excerpt.rendered.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').slice(0, 300);
+
+                const isIrrelevant = EXCLUDED_KEYWORDS.some(kw =>
+                    title.toLowerCase().includes(kw) || summary.toLowerCase().includes(kw)
+                );
+                const isRelevant = INCLUDED_KEYWORDS.some(kw =>
+                    title.toLowerCase().includes(kw) || summary.toLowerCase().includes(kw)
+                );
+
+                if (isIrrelevant || !isRelevant) continue;
+
+                allHeadlines.push({
+                    title,
+                    summary,
+                    source: source.name,
+                    category: source.category,
+                    image_url: imageUrl
+                });
+            }
+        } catch (error) {
+            console.error(`Failed to scan ${source.name}:`, error);
+        }
+    }
+
+    console.log(`Total relevant headlines found: ${allHeadlines.length}`);
+
+    // Group similar headlines by checking keyword overlap
+    const topics: { headlines: string[]; summaries: string[]; category: string; sources: string[]; image_url: string }[] = [];
+    const used = new Set<number>();
+
+    for (let i = 0; i < allHeadlines.length; i++) {
+        if (used.has(i)) continue;
+
+        const cluster = [allHeadlines[i]];
+        used.add(i);
+
+        const wordsA = allHeadlines[i].title.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+
+        for (let j = i + 1; j < allHeadlines.length; j++) {
+            if (used.has(j)) continue;
+            const wordsB = allHeadlines[j].title.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+            const overlap = wordsA.filter(w => wordsB.includes(w)).length;
+
+            // If 2+ significant words overlap, it's the same topic
+            if (overlap >= 2) {
+                cluster.push(allHeadlines[j]);
+                used.add(j);
+            }
+        }
+
+        topics.push({
+            headlines: cluster.map(c => c.title),
+            summaries: cluster.map(c => c.summary),
+            category: cluster[0].category,
+            sources: cluster.map(c => c.source),
+            image_url: cluster[0].image_url
+        });
+    }
+
+    // Sort by cluster size (most covered topics first), take top 5
+    topics.sort((a, b) => b.headlines.length - a.headlines.length);
+    const topTopics = topics.slice(0, 5);
+
+    console.log(`Identified ${topTopics.length} trending topics for article generation`);
+    return { topics: topTopics };
+}

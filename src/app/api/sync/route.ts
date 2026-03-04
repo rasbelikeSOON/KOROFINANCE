@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { fetchCryptoData, fetchForexRate, fetchNGXStocks, fetchITickStocks } from "@/lib/api/market";
-import { fetchExternalNews } from "@/lib/api/news";
+import { detectTrendingTopics } from "@/lib/api/news";
+import { generateMultipleArticles } from "@/lib/api/ai-writer";
 
 export async function GET(request: Request) {
     try {
@@ -59,20 +60,45 @@ export async function GET(request: Request) {
         }
 
         if (type === "news" || type === "all" || !type) {
-            const articles = await fetchExternalNews();
-            if (articles.length > 0) {
-                const { error } = await supabase
-                    .from("news_articles")
-                    .upsert(
-                        articles.map(a => ({
-                            ...a,
+            const { topics } = await detectTrendingTopics();
+            let count = 0;
+
+            if (topics.length > 0) {
+                const articles = await generateMultipleArticles(topics);
+
+                if (articles.length > 0) {
+                    const toInsert = articles.map((article, index) => {
+                        const slug = article.title
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, '-')
+                            .replace(/(^-|-$)+/g, '')
+                            .slice(0, 80);
+
+                        const datePrefix = new Date().toISOString().slice(0, 10);
+                        const finalSlug = `/news/${datePrefix}-${slug}`;
+
+                        return {
+                            title: article.title,
+                            summary: article.summary,
+                            content: article.content,
+                            url: finalSlug,
+                            image_url: topics[index]?.image_url || "https://images.unsplash.com/photo-1611974714652-17852e91dac7?q=80&w=2070&auto=format&fit=crop",
+                            source: "KoroFinance",
+                            category: article.category,
+                            published_at: new Date().toISOString(),
                             created_at: new Date().toISOString()
-                        })),
-                        { onConflict: "url" }
-                    );
-                if (error) throw error;
+                        };
+                    });
+
+                    const { error } = await supabase
+                        .from("news_articles")
+                        .upsert(toInsert, { onConflict: "url" });
+
+                    if (error) throw error;
+                    count = toInsert.length;
+                }
             }
-            results.news = { count: articles.length, success: true };
+            results.news = { count, success: true };
         }
 
         return NextResponse.json({ success: true, message: "Manual sync executed", results });
