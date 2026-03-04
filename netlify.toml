@@ -12,7 +12,7 @@
   schedule = "@daily"
 
 [functions.refresh-news]
-  schedule = "@daily"
+  schedule = "0 6,18 * * *"
 
 [[headers]]
   for = "/api/*"
