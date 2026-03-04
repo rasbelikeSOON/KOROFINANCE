@@ -25,6 +25,10 @@ export const metadata: Metadata = {
   description: "Simplifying financial growth, real-time markets, and economy insights for every Nigerian.",
   icons: {
     icon: "/favicon-premium.png",
+    apple: "/apple-touch-icon.png",
+  },
+  alternates: {
+    canonical: "https://korofinance.com",
   },
   openGraph: {
     title: "Korofinance",

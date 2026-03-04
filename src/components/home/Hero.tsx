@@ -27,8 +27,8 @@ export default function Hero() {
                                 Money Simplified for Nigerians
                             </span>
                             <h1 className="text-6xl md:text-8xl font-display font-extrabold text-foreground leading-[1.05] tracking-tight">
-                                Money&apos;s<br />
-                                <span className="text-primary text-5xl md:text-7xl">an easy thing.</span>
+                                Korofinance:<br />
+                                <span className="text-primary text-5xl md:text-7xl">Money&apos;an easy thing.</span>
                             </h1>
                         </motion.div>
 
