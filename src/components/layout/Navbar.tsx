@@ -46,18 +46,6 @@ export default function Navbar() {
                         <button className="p-2 text-muted-foreground hover:text-foreground transition-colors">
                             <Search className="w-5 h-5" />
                         </button>
-                        <Link
-                            href="/auth/login"
-                            className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-                        >
-                            Sign In
-                        </Link>
-                        <Link
-                            href="/auth/register"
-                            className="px-4 py-2 bg-primary text-background text-sm font-bold rounded-sm hover:bg-primary/90 transition-all active:scale-95"
-                        >
-                            Get Started
-                        </Link>
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -88,20 +76,10 @@ export default function Navbar() {
                         ))}
                     </div>
                     <div className="pt-6 border-t border-border-card flex flex-col space-y-4">
-                        <Link
-                            href="/auth/login"
-                            className="text-lg font-medium text-foreground"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                            Sign In
-                        </Link>
-                        <Link
-                            href="/auth/register"
-                            className="w-full py-4 bg-primary text-background text-center font-bold rounded-sm text-lg"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                            Get Started
-                        </Link>
+                        <button className="w-full py-4 bg-primary text-background text-center font-bold rounded-sm text-lg flex items-center justify-center">
+                            Search Markets
+                            <Search className="ml-2 w-5 h-5" />
+                        </button>
                     </div>
                 </div>
             )}
