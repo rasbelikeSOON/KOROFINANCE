@@ -59,7 +59,7 @@ export default function FeaturedNews() {
                     <div className="grid lg:grid-cols-12 gap-8">
                         {/* Hero Article */}
                         <div className="lg:col-span-7 group cursor-pointer">
-                            <a href={heroArticle.url} target="_blank" rel="noopener noreferrer">
+                            <Link href={heroArticle.url}>
                                 <div className="relative aspect-[16/9] overflow-hidden rounded-md mb-6 grayscale hover:grayscale-0 transition-all duration-700">
                                     <img
                                         src={heroArticle.image_url}
@@ -85,14 +85,14 @@ export default function FeaturedNews() {
                                         {formatDistanceToNow(new Date(heroArticle.published_at), { addSuffix: true })}
                                     </span>
                                 </div>
-                            </a>
+                            </Link>
                         </div>
 
                         {/* Side Articles */}
                         <div className="lg:col-span-5 space-y-8">
                             {sideArticles.map((article: any) => (
                                 <div key={article.id} className="group cursor-pointer border-b border-border-card/50 pb-8 last:border-0 last:pb-0">
-                                    <a href={article.url} target="_blank" rel="noopener noreferrer">
+                                    <Link href={article.url}>
                                         <span className="block text-[10px] font-mono font-bold text-primary uppercase tracking-widest mb-2">
                                             {article.category}
                                         </span>
@@ -103,7 +103,7 @@ export default function FeaturedNews() {
                                             <Clock className="w-3 h-3 mr-1 opacity-50" />
                                             {formatDistanceToNow(new Date(article.published_at), { addSuffix: true })}
                                         </span>
-                                    </a>
+                                    </Link>
                                 </div>
                             ))}
 

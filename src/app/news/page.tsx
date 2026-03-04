@@ -53,7 +53,7 @@ export default function NewsPage() {
                                         )}
                                     </div>
                                     <div className="md:col-span-7 space-y-4">
-                                        <a href={article.url} target="_blank" rel="noopener noreferrer">
+                                        <Link href={article.url}>
                                             <div className="flex items-center space-x-2 mb-3">
                                                 <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-widest">{article.category}</span>
                                                 <span className="w-1 h-1 bg-muted-foreground rounded-full" />
@@ -70,7 +70,7 @@ export default function NewsPage() {
                                             <div className="flex items-center pt-4 text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
                                                 <span className="font-bold text-foreground mr-2">Via {article.source}</span>
                                             </div>
-                                        </a>
+                                        </Link>
                                     </div>
                                 </article>
                             ))

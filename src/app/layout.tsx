@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Syne, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import NewsletterPopup from "@/components/common/NewsletterPopup";
 
 const syne = Syne({
   variable: "--font-syne",
@@ -61,6 +62,7 @@ export default function RootLayout({
         className={`${syne.variable} ${instrumentSans.variable} ${jetbrainsMono.variable} antialiased bg-background text-foreground font-sans`}
       >
         {children}
+        <NewsletterPopup />
       </body>
     </html>
   );
