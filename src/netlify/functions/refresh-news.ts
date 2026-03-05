@@ -1,96 +1,81 @@
-import { detectTrendingTopics } from "../../lib/api/news";
-import { generateMultipleArticles } from "../../lib/api/ai-writer";
+﻿import { detectTrendingTopics } from "../../lib/api/news";
+import { generateCycleArticles, getCurrentCycleCategories, CATEGORIES } from "../../lib/api/ai-writer";
 import { supabase } from "../../lib/supabase";
 
-function generateSlug(title: string): string {
-    return title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)+/g, '')
-        .slice(0, 80);
-}
-
-/**
- * Netlify Scheduled Function
- * Runs twice daily (6 AM & 6 PM UTC) to:
- * 1. Scan 6 Nigerian news sources for trending financial topics
- * 2. Use Gemini AI to write original articles about those topics
- * 3. Auto-publish to the news_articles table
- */
-export async function handler(event: any, context: any) {
-    console.log("Starting AI news generation pipeline...");
+// Netlify Scheduled Function - runs every 6 hours based on netlify.toml schedule.
+// Picks cycle categories from the 48-hour rotation, generates via Gemini, saves to Supabase.
+export async function handler(event: any) {
+    const cycleCategories = getCurrentCycleCategories();
+    console.log("[Koro] Cycle categories:", cycleCategories.join(", "));
 
     try {
-        // Step 1: Detect trending topics from external sources
         const { topics } = await detectTrendingTopics();
-        console.log(`Found ${topics.length} trending topics`);
+        const activeTopic = topics.length > 0 ? topics : [{
+            headlines: ["Nigerian financial markets update"],
+            summaries: ["Latest developments in the Nigerian economy and NGX markets"],
+            category: "Markets",
+            sources: ["KoroFinance"],
+            image_url: "https://images.unsplash.com/photo-1611974714652-17852e91dac7?q=80&w=2070&auto=format&fit=crop"
+        }];
 
-        if (topics.length === 0) {
-            return {
-                statusCode: 200,
-                body: JSON.stringify({ message: "No trending topics found", articlesGenerated: 0 }),
-            };
-        }
-
-        // Step 2: Generate original articles using Gemini AI
-        const articles = await generateMultipleArticles(topics);
-        console.log(`AI generated ${articles.length} original articles`);
-
-        if (articles.length === 0) {
-            return {
-                statusCode: 200,
-                body: JSON.stringify({ message: "AI generation returned no articles", articlesGenerated: 0 }),
-            };
-        }
-
-        // Step 3: Publish to Supabase
-        const seenSlugs = new Set<string>();
-        const toInsert = articles.map((article, index) => {
-            let slug = generateSlug(article.title);
-            // Add date prefix for uniqueness
-            const datePrefix = new Date().toISOString().slice(0, 10);
-            slug = `${datePrefix}-${slug}`;
-
-            if (seenSlugs.has(slug)) {
-                slug += `-${index}`;
+        let marketSummary = "Market data unavailable.";
+        try {
+            const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.URL || "https://korofinance.netlify.app";
+            const [ngxRes, cryptoRes] = await Promise.all([
+                fetch(`${siteUrl}/api/market?type=NGX`),
+                fetch(`${siteUrl}/api/market?type=Crypto`)
+            ]);
+            const lines: string[] = [];
+            if (ngxRes.ok) {
+                const ngx = await ngxRes.json();
+                lines.push("NGX STOCKS:");
+                ngx.forEach((s: any) => lines.push(`  ${s.ticker}: N${s.price.toFixed(2)} (${s.change_pct >= 0 ? "+" : ""}${s.change_pct.toFixed(2)}%)`));
             }
-            seenSlugs.add(slug);
+            if (cryptoRes.ok) {
+                const crypto = await cryptoRes.json();
+                lines.push("CRYPTO:");
+                crypto.forEach((c: any) => lines.push(`  ${c.ticker}: $${c.price.toLocaleString()} (${c.change_pct >= 0 ? "+" : ""}${c.change_pct.toFixed(2)}%)`));
+            }
+            if (lines.length > 0) marketSummary = lines.join("\n");
+        } catch (e) {
+            console.warn("Market data fetch failed:", e);
+        }
 
+        const articles = await generateCycleArticles(activeTopic, marketSummary, cycleCategories);
+        if (articles.length === 0) {
+            return { statusCode: 200, body: JSON.stringify({ message: "No articles generated", articlesGenerated: 0 }) };
+        }
+
+        const datePrefix = new Date().toISOString().slice(0, 10);
+        const toInsert = articles.map((article, idx) => {
+            const uniqueSlug = `${datePrefix}-${article.slug}-${Date.now().toString(36).slice(-4)}-${idx}`;
+            const categoryDef = CATEGORIES[article.category as keyof typeof CATEGORIES];
             return {
                 title: article.title,
                 summary: article.summary,
                 content: article.content,
-                url: `/news/${slug}`,
-                image_url: topics[index]?.image_url || "https://images.unsplash.com/photo-1611974714652-17852e91dac7?q=80&w=2070&auto=format&fit=crop",
+                url: `/news/${uniqueSlug}`,
+                slug: uniqueSlug,
+                image_url: activeTopic[idx % activeTopic.length]?.image_url || "https://images.unsplash.com/photo-1611974714652-17852e91dac7?q=80&w=2070&auto=format&fit=crop",
                 source: "KoroFinance",
                 category: article.category,
+                tag_colour: categoryDef?.tag_colour || "#5B2ECC",
+                read_time: categoryDef?.read_time || 4,
+                is_generated: true,
+                is_breaking: false,
                 published_at: new Date().toISOString(),
                 created_at: new Date().toISOString()
             };
         });
 
-        const { error } = await supabase
-            .from("news_articles")
-            .upsert(toInsert, { onConflict: "url" });
-
+        const { error } = await supabase.from("news_articles").upsert(toInsert, { onConflict: "slug" });
         if (error) throw error;
-
-        console.log(`Successfully published ${toInsert.length} AI-generated articles`);
 
         return {
             statusCode: 200,
-            body: JSON.stringify({
-                message: "AI news generation complete",
-                topicsAnalyzed: topics.length,
-                articlesGenerated: toInsert.length,
-                titles: toInsert.map(a => a.title)
-            }),
+            body: JSON.stringify({ message: "Koro content cycle complete", cycle: cycleCategories, articlesGenerated: toInsert.length, titles: toInsert.map((a) => a.title) })
         };
     } catch (error: any) {
-        console.error("AI news pipeline failed:", error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: "Failed to generate news", details: error.message }),
-        };
+        return { statusCode: 500, body: JSON.stringify({ error: "Content cycle failed", details: error.message }) };
     }
 }
