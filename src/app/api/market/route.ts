@@ -3,17 +3,6 @@ import { NextResponse } from 'next/server';
 const CRYPTO_IDS = "bitcoin,ethereum,solana,binancecoin,ripple";
 const FOREX_PAIRS = ["USD", "EUR", "GBP", "CAD", "ZAR"];
 
-const generateMockSparkline = (basePrice: number, volatility: number = 0.02) => {
-    let current = basePrice;
-    const sparkline = [];
-    for (let i = 0; i < 20; i++) {
-        sparkline.push(current);
-        const change = current * (Math.random() * volatility * 2 - volatility);
-        current += change;
-    }
-    return sparkline;
-};
-
 // Seed values for mock NGX
 const ngxStocks = [
     { ticker: "DANGCEM", name: "Dangote Cement", basePrice: 650 },
@@ -23,6 +12,43 @@ const ngxStocks = [
     { ticker: "ZENITHBANK", name: "Zenith Bank", basePrice: 42 },
 ];
 
+/**
+ * Deterministic pseudo-random number generator (Mulberry32).
+ * Same seed always produces the same sequence — no more mismatching prices
+ * between Markets and Portfolio pages.
+ */
+function mulberry32(seed: number) {
+    return function () {
+        seed |= 0;
+        seed = seed + 0x6d2b79f5 | 0;
+        let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+}
+
+/**
+ * Returns a seeded RNG locked to the current 30-second time window.
+ * Every caller within the same 30s bucket gets identical random outputs,
+ * so all pages display consistent prices simultaneously.
+ */
+function getWindowedRng(salt: number = 0) {
+    const windowMs = 30_000;
+    const bucket = Math.floor(Date.now() / windowMs);
+    return mulberry32(bucket * 31337 + salt);
+}
+
+const generateSeededSparkline = (rand: () => number, basePrice: number, volatility: number = 0.02) => {
+    let current = basePrice;
+    const sparkline = [];
+    for (let i = 0; i < 20; i++) {
+        sparkline.push(current);
+        const change = current * (rand() * volatility * 2 - volatility);
+        current += change;
+    }
+    return sparkline;
+};
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || "NGX";
@@ -30,7 +56,10 @@ export async function GET(request: Request) {
     try {
         if (type === "Crypto") {
             // Fetch live crypto data with sparkline from CoinGecko
-            const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${CRYPTO_IDS}&sparkline=true&price_change_percentage=24h`, { next: { revalidate: 30 } });
+            const res = await fetch(
+                `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${CRYPTO_IDS}&sparkline=true&price_change_percentage=24h`,
+                { next: { revalidate: 30 } }
+            );
             if (!res.ok) throw new Error("CoinGecko API Error");
             const data = await res.json();
 
@@ -39,7 +68,7 @@ export async function GET(request: Request) {
                 name: coin.name,
                 price: coin.current_price,
                 change_pct: coin.price_change_percentage_24h,
-                sparkline: coin.sparkline_in_7d.price.slice(-20) // take last 20 data points
+                sparkline: coin.sparkline_in_7d.price.slice(-20)
             }));
             return NextResponse.json(results);
         }
@@ -49,12 +78,11 @@ export async function GET(request: Request) {
             let rates: Record<string, number> = {};
 
             if (API_KEY && API_KEY !== 'undefined') {
-                // Fetch NGN base rates to invert, or just fetch directly if possible. Exchangerate-api standard allows getting all rates from a base.
                 const res = await fetch(`https://v6.exchangerate-api.com/v6/${API_KEY}/latest/USD`, { next: { revalidate: 3600 } });
                 if (res.ok) {
                     const data = await res.json();
                     const usdToNgn = data.conversion_rates["NGN"];
-                    rates["USD"] = usdToNgn; // USD to NGN
+                    rates["USD"] = usdToNgn;
                     rates["EUR"] = usdToNgn / data.conversion_rates["EUR"];
                     rates["GBP"] = usdToNgn / data.conversion_rates["GBP"];
                     rates["CAD"] = usdToNgn / data.conversion_rates["CAD"];
@@ -62,19 +90,17 @@ export async function GET(request: Request) {
                 }
             }
 
-            // Fallback mock if API fails or no key
             if (Object.keys(rates).length === 0) {
                 rates = { USD: 1650, EUR: 1780, GBP: 2100, CAD: 1200, ZAR: 85 };
             }
 
-            // Add some live noise (±0.5%) to make it feel real-time
-            const noise = (val: number) => val * (1 + (Math.random() * 0.01 - 0.005));
-
-            const results = FOREX_PAIRS.map(pair => {
+            // Seeded per 30s window to keep forex values consistent across all pages
+            const results = FOREX_PAIRS.map((pair, idx) => {
+                const rand = getWindowedRng(idx + 100);
                 const baseValue = rates[pair];
-                const liveValue = noise(baseValue);
-                const sparkline = generateMockSparkline(baseValue, 0.005);
-                sparkline[sparkline.length - 1] = liveValue; // ensure current price is end of sparkline
+                const liveValue = baseValue * (1 + (rand() * 0.01 - 0.005));
+                const sparkline = generateSeededSparkline(rand, baseValue, 0.005);
+                sparkline[sparkline.length - 1] = liveValue;
 
                 return {
                     ticker: `${pair}/NGN`,
@@ -87,14 +113,14 @@ export async function GET(request: Request) {
             return NextResponse.json(results);
         }
 
-        // Default: Mock simulated NGX data
-        // Simulate real-time ticking by adjusting the base price randomly by ±2%
-        const results = ngxStocks.map(stock => {
-            // Fake a realistic live move every Request
-            const changePct = (Math.random() * 4) - 2; // -2% to +2%
+        // Default: Mock simulated NGX data — SEEDED to 30-second window
+        // This guarantees Markets page and Portfolio page show the same price
+        const results = ngxStocks.map((stock, idx) => {
+            const rand = getWindowedRng(idx); // same seed per window per stock
+            const changePct = (rand() * 4) - 2; // -2% to +2%, deterministic
             const livePrice = stock.basePrice * (1 + (changePct / 100));
 
-            const sparkline = generateMockSparkline(stock.basePrice, 0.02);
+            const sparkline = generateSeededSparkline(rand, stock.basePrice, 0.02);
             sparkline[sparkline.length - 1] = livePrice;
 
             return {
@@ -106,7 +132,6 @@ export async function GET(request: Request) {
             };
         });
 
-        // Sort by biggest movers 
         results.sort((a, b) => Math.abs(b.change_pct) - Math.abs(a.change_pct));
 
         return NextResponse.json(results);
