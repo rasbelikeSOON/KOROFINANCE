@@ -250,7 +250,7 @@ export default function PortfolioPage() {
                                 {/* Allocation Pie Chart */}
                                 <div className="bg-white rounded-[12px] shadow-[0_2px_16px_rgba(0,0,0,0.07)] p-[32px]">
                                     <h3 className="font-display font-bold text-[24px] text-[#0A0A0A] mb-8">Asset Allocation</h3>
-                                    <div className="h-[280px] relative">
+                                    <div className="h-[280px] min-h-[280px] w-full relative">
                                         <ResponsiveContainer width="100%" height="100%">
                                             <PieChart>
                                                 <Pie
@@ -293,7 +293,7 @@ export default function PortfolioPage() {
                                 {/* Performance Bar Chart */}
                                 <div className="bg-white rounded-[12px] shadow-[0_2px_16px_rgba(0,0,0,0.07)] p-[32px]">
                                     <h3 className="font-display font-bold text-[24px] text-[#0A0A0A] mb-8">Asset Performance</h3>
-                                    <div className="h-[280px]">
+                                    <div className="h-[280px] min-h-[280px] w-full relative">
                                         <ResponsiveContainer width="100%" height="100%">
                                             <BarChart data={barData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E0E0E0" />
@@ -429,11 +429,11 @@ export default function PortfolioPage() {
 
             {/* Drawer Container (Slide up mobile, side drawer desktop) */}
             <div
-                className={`fixed z-[120] bg-white shadow-2xl transition-transform duration-300 ease-in-out
+                className={`fixed z-[120] bg-white shadow-2xl transition-all duration-300 ease-in-out
                     bottom-0 left-0 w-full h-[80vh] rounded-t-[20px] 
                     md:top-0 md:right-0 md:bottom-auto md:w-[400px] md:h-full md:rounded-l-[20px] md:rounded-none
                     flex flex-col
-                    ${isFormOpen ? "translate-y-0 md:translate-y-0 md:translate-x-0" : "translate-y-full md:translate-y-0 md:translate-x-full"}`}
+                    ${isFormOpen ? "translate-y-0 md:translate-x-0 opacity-100" : "translate-y-full md:translate-y-0 md:translate-x-full opacity-0 pointer-events-none"}`}
             >
                 <div className="flex items-center justify-between p-6 border-b border-[#E0E0E0] shrink-0">
                     <h2 className="text-[24px] font-display font-bold text-[#0A0A0A]">
