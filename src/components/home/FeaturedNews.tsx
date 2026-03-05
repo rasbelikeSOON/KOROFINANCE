@@ -2,124 +2,89 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, Clock } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import useSWR from "swr";
 import { getLiveNews } from "@/lib/api/news";
-import { formatDistanceToNow } from "date-fns";
 
 export default function FeaturedNews() {
+    // Keep using the existing mock logic, as NewsAPI requires key and prompt says "or mock equivalent if key missing"
     const { data: news, isLoading } = useSWR("live_news", getLiveNews);
 
-    const heroArticle = news && news.length > 0 ? news[0] : null;
-    const sideArticles = news && news.length > 1 ? news.slice(1, 4) : [];
+    const articles = news ? news.slice(0, 3) : [];
 
     return (
-        <section className="py-24 bg-background">
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-end justify-between mb-12 border-b border-border-card pb-6">
-                    <div>
-                        <h2 className="text-4xl font-display font-extrabold text-foreground mb-2 italic uppercase tracking-tight">
-                            Latest from the Markets
+        <section className="bg-white py-[80px]">
+            <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="mb-12">
+                    <h3 className="font-sans font-bold text-[11px] text-[#5B2ECC] tracking-[3px] uppercase mb-4">
+                        Latest News
+                    </h3>
+                    <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b border-[#E0E0E0] pb-6 gap-4">
+                        <h2 className="font-display font-bold text-[#0A0A0A] text-[40px] leading-[1.2]">
+                            From the markets.
                         </h2>
-                        <p className="text-muted-foreground font-mono text-sm uppercase tracking-widest">
-                            Money Simplified &bull; Real-time reporting
-                        </p>
+                        <Link
+                            href="/news"
+                            className="font-sans font-semibold text-[14px] text-[#5B2ECC] hover:text-[#4A25A8] flex items-center mb-2"
+                        >
+                            View all <ArrowRight className="ml-1 w-4 h-4" />
+                        </Link>
                     </div>
-                    <Link
-                        href="/news"
-                        className="hidden sm:flex items-center text-primary font-bold hover:gap-2 transition-all p-2"
-                    >
-                        View all news <ArrowRight className="ml-2 w-4 h-4" />
-                    </Link>
                 </div>
 
                 {isLoading ? (
-                    <div className="grid lg:grid-cols-12 gap-8">
-                        {/* Hero Skeleton */}
-                        <div className="lg:col-span-7 space-y-6">
-                            <div className="aspect-[16/9] bg-surface-2 animate-pulse rounded-sm" />
-                            <div className="h-10 bg-surface-2 animate-pulse w-3/4 rounded-sm" />
-                            <div className="space-y-3">
-                                <div className="h-4 bg-surface-2 animate-pulse w-full rounded-sm" />
-                                <div className="h-4 bg-surface-2 animate-pulse w-5/6 rounded-sm" />
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="animate-pulse space-y-4">
+                                <div className="h-[200px] bg-[#E0E0E0] rounded-[12px]" />
+                                <div className="h-4 bg-[#E0E0E0] rounded w-full" />
+                                <div className="h-4 bg-[#E0E0E0] rounded w-2/3" />
                             </div>
-                        </div>
-                        {/* Side List Skeleton */}
-                        <div className="lg:col-span-5 space-y-10">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="space-y-3 border-b border-border-card/50 pb-8 last:border-0">
-                                    <div className="h-3 bg-surface-2 animate-pulse w-16 rounded-sm" />
-                                    <div className="h-6 bg-surface-2 animate-pulse w-full rounded-sm" />
-                                    <div className="h-3 bg-surface-2 animate-pulse w-24 rounded-sm" />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                ) : heroArticle ? (
-                    <div className="grid lg:grid-cols-12 gap-8">
-                        {/* Hero Article */}
-                        <div className="lg:col-span-7 group cursor-pointer">
-                            <Link href={heroArticle.url}>
-                                <div className="relative aspect-[16/9] overflow-hidden rounded-md mb-6 grayscale hover:grayscale-0 transition-all duration-700">
-                                    <img
-                                        src={heroArticle.image_url}
-                                        alt={heroArticle.title}
-                                        className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700"
-                                    />
-                                    <div className="absolute top-4 left-4">
-                                        <span className="px-3 py-1 bg-primary text-background text-[10px] font-bold uppercase tracking-widest rounded-sm">
-                                            {heroArticle.category}
-                                        </span>
-                                    </div>
-                                </div>
-                                <h3 className="text-3xl font-display font-bold text-foreground mb-4 group-hover:text-primary transition-colors leading-tight">
-                                    {heroArticle.title}
-                                </h3>
-                                <p className="text-muted-foreground mb-6 line-clamp-2">
-                                    {heroArticle.summary}
-                                </p>
-                                <div className="flex items-center text-xs font-mono text-muted-foreground space-x-4">
-                                    <span className="font-bold text-foreground uppercase tracking-widest">{heroArticle.source}</span>
-                                    <span className="flex items-center">
-                                        <Clock className="w-3 h-3 mr-1" />
-                                        {formatDistanceToNow(new Date(heroArticle.published_at), { addSuffix: true })}
-                                    </span>
-                                </div>
-                            </Link>
-                        </div>
-
-                        {/* Side Articles */}
-                        <div className="lg:col-span-5 space-y-8">
-                            {sideArticles.map((article: any) => (
-                                <div key={article.id} className="group cursor-pointer border-b border-border-card/50 pb-8 last:border-0 last:pb-0">
-                                    <Link href={article.url}>
-                                        <span className="block text-[10px] font-mono font-bold text-primary uppercase tracking-widest mb-2">
-                                            {article.category}
-                                        </span>
-                                        <h4 className="text-xl font-display font-bold text-foreground group-hover:text-primary transition-colors leading-snug mb-3">
-                                            {article.title}
-                                        </h4>
-                                        <span className="flex items-center text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
-                                            <Clock className="w-3 h-3 mr-1 opacity-50" />
-                                            {formatDistanceToNow(new Date(article.published_at), { addSuffix: true })}
-                                        </span>
-                                    </Link>
-                                </div>
-                            ))}
-
-                            <div className="pt-4">
-                                <Link
-                                    href="/news"
-                                    className="flex items-center justify-center w-full py-4 border border-border-card text-foreground font-bold rounded-sm hover:bg-surface transition-all"
-                                >
-                                    View all stories
-                                </Link>
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-20 border border-dashed border-border-card rounded-md">
-                        <p className="text-xs font-mono text-muted-foreground uppercase opacity-50">Terminal offline. Trigger news sync to see live reporting.</p>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {articles.map((article: any, idx: number) => {
+                            // Map category to a styled tag
+                            let categoryDisplay = article.category || "Markets";
+                            const avatarUrl = `https://api.dicebear.com/7.x/notionists/svg?seed=${article.id || idx}&backgroundColor=F4F1FF`;
+
+                            return (
+                                <Link
+                                    href={article.url || "#"}
+                                    key={article.id || idx}
+                                    className="group flex flex-col bg-white rounded-[12px] p-5 shadow-[0_2px_16px_rgba(0,0,0,0.07)] border border-[#E0E0E0]/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)]"
+                                >
+                                    <div className="mb-4">
+                                        <span className="inline-block bg-[#F4F1FF] text-[#5B2ECC] font-sans font-bold text-[11px] px-3 py-1 rounded-[100px] uppercase">
+                                            {categoryDisplay}
+                                        </span>
+                                    </div>
+                                    <h3 className="font-display font-bold text-[#0A0A0A] text-[20px] leading-[1.3] mb-3 line-clamp-2">
+                                        {article.title}
+                                    </h3>
+                                    <p className="font-sans text-[14px] text-[#777777] leading-[1.6] line-clamp-2 mb-6 flex-grow">
+                                        {article.summary}
+                                    </p>
+
+                                    <div className="flex items-center mt-auto pt-4 border-t border-[#E0E0E0]/50">
+                                        <img
+                                            src={avatarUrl}
+                                            alt="Author"
+                                            className="w-8 h-8 rounded-full bg-[#F4F1FF] mr-3"
+                                        />
+                                        <div className="flex flex-col">
+                                            <span className="font-sans font-semibold text-[13px] text-[#0A0A0A]">
+                                                {article.source || "Koro Desk"}
+                                            </span>
+                                            <span className="font-sans text-[12px] text-[#AAAAAA]">
+                                                {new Date(article.published_at || Date.now()).toLocaleDateString("en-NG", { month: "short", day: "numeric" })} • 4 min read
+                                            </span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            );
+                        })}
                     </div>
                 )}
             </div>

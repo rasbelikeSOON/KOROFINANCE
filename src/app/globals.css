@@ -1,34 +1,28 @@
 @import "tailwindcss";
 
 @theme {
-  /* Neutral Professional Palette */
-  --color-background: #050608;
-  --color-foreground: #F8F9FA;
-  --color-surface: #0F1115;
-  --color-surface-2: #16191E;
-  --color-border-card: #1C2127;
-  --color-primary: #00E87A;
-  --color-muted-foreground: #8B949E;
+  /* Strict Brand Colors */
+  --color-background: #FFFFFF;
+  --color-foreground: #0A0A0A;
+  --color-accent: #5B2ECC;
+  --color-surface-secondary: #F4F1FF;
+  --color-border-divider: #E0E0E0;
+  --color-success: #1A7A4A;
+  --color-danger: #C0392B;
 
-  /* Typography Scale */
-  --font-display: var(--font-syne);
-  --font-sans: var(--font-instrument);
-  --font-mono: var(--font-mono);
+  /* Typographical Scale Mapping */
+  --font-display: var(--font-playfair);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains);
 
-  /* Strict Constraint System */
-  --radius-none: 0;
-  --radius-sm: 2px;
-  --radius-md: 4px;
-
-  /* Standard Easing */
-  --ease-professional: cubic-bezier(0.4, 0, 0.2, 1);
+  /* Structure */
+  --radius-card: 12px;
 }
 
 :root {
-  --background: #050608;
-  --foreground: #F8F9FA;
+  --background: #FFFFFF;
+  --foreground: #0A0A0A;
 
-  /* Type Scale */
   --text-xs: 0.75rem;
   /* 12px */
   --text-sm: 0.875rem;
@@ -45,12 +39,18 @@
   /* 30px */
   --text-4xl: 2.25rem;
   /* 36px */
+  --text-5xl: 3rem;
+  /* 48px */
+  --text-6xl: 4rem;
+  /* 64px */
+  --text-7xl: 5rem;
+  /* 80px */
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-instrument), system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
@@ -58,31 +58,21 @@ body {
 h1,
 h2,
 h3,
+h4,
+h5,
+h6,
 .font-display {
-  font-family: var(--font-syne), sans-serif;
-  line-height: 1.1;
+  font-family: var(--font-playfair), serif;
   font-weight: 700;
 }
 
-/* UI Elements */
+/* Base Card Styles */
 .card-professional {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-card);
-  border-radius: var(--radius-sm);
-  transition: transform 0.2s var(--ease-professional), border-color 0.2s var(--ease-professional);
-}
-
-.card-professional:hover {
-  transform: translateY(-2px);
-  border-color: var(--color-primary);
-}
-
-/* Remove generic glows and vibe-coding */
-.glass {
-  background: rgba(15, 17, 21, 0.95);
-  border: 1px solid var(--color-border-card);
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
 }
 
 .ticker-mask {
-  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
