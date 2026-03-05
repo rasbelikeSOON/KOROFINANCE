@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { detectTrendingTopics } from "@/lib/api/news";
 import { generateCycleArticles, getCurrentCycleCategories, CATEGORIES } from "@/lib/api/ai-writer";
+import { fetchNGXStocks, fetchCryptoData } from "@/lib/api/market";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
     try {
@@ -20,11 +23,10 @@ export async function GET(request: Request) {
             // 2. Fetch live market snapshot to inject into prompts
             let marketSummary = "No live market data available.";
             try {
-                const mktRes = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/api/market?type=NGX`);
-                if (mktRes.ok) {
-                    const mktData = await mktRes.json();
-                    marketSummary = mktData.map((s: any) =>
-                        `${s.ticker} (${s.name}): ₦${s.price.toFixed(2)} | ${s.change_pct >= 0 ? "+" : ""}${s.change_pct.toFixed(2)}%`
+                const ngxStocks = await fetchNGXStocks();
+                if (ngxStocks && ngxStocks.length > 0) {
+                    marketSummary = ngxStocks.slice(0, 10).map((s: any) =>
+                        `${s.symbol} (${s.name}): ₦${s.price.toFixed(2)} | ${s.changePct >= 0 ? "+" : ""}${s.changePct.toFixed(2)}%`
                     ).join("\n");
                 }
             } catch (e) {
@@ -33,12 +35,13 @@ export async function GET(request: Request) {
 
             let cryptoSummary = "";
             try {
-                const cryptoRes = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/api/market?type=Crypto`);
-                if (cryptoRes.ok) {
-                    const cryptoData = await cryptoRes.json();
-                    cryptoSummary = cryptoData.map((c: any) =>
-                        `${c.ticker} (${c.name}): $${c.price.toLocaleString()} | ${c.change_pct >= 0 ? "+" : ""}${c.change_pct.toFixed(2)}%`
-                    ).join("\n");
+                const btc = await fetchCryptoData("bitcoin");
+                const eth = await fetchCryptoData("ethereum");
+
+                if (btc) cryptoSummary += `BTC (Bitcoin): $${btc.price.toLocaleString()} | ${btc.changePct >= 0 ? "+" : ""}${btc.changePct.toFixed(2)}%\n`;
+                if (eth) cryptoSummary += `ETH (Ethereum): $${eth.price.toLocaleString()} | ${eth.changePct >= 0 ? "+" : ""}${eth.changePct.toFixed(2)}%`;
+
+                if (cryptoSummary) {
                     marketSummary = marketSummary + "\n\nCRYPTO:\n" + cryptoSummary;
                 }
             } catch (e) {

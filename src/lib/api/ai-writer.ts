@@ -394,7 +394,42 @@ export async function generateCycleArticles(
             await new Promise(resolve => setTimeout(resolve, 1500));
         }
 
-        const article = await generateArticle(category, topic, marketData);
+        let article = await generateArticle(category, topic, marketData);
+
+        // MOCK FALLBACK for UI testing when API Key fails
+        if (!article) {
+            console.log(`[Mock Fallback] Generating dummy content for "${category}"...`);
+            const mockDate = Date.now().toString(36);
+            const slug = `${category.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${mockDate}`;
+
+            article = {
+                title: `[MOCK] ${category}: The Latest Movement in ${topic.headlines[0]?.split(' ')[0] || 'the Market'}`,
+                summary: `This is a rich mock article generated because the Gemini API key is missing or invalid. It tests the ${category} structure.`,
+                content: `[THIS CYCLE'S THEME]
+The market is currently reacting to the recent headlines: ${topic.headlines[0] || 'Market changes'}. Investors are watching closely as volume spikes across standard tickers.
+
+[THE DATA]
+- ${marketData.split('\n')[1] || 'NGX ASI: Up 1.2%'}
+- Volumes have increased by 15% across top banking stocks.
+- Forex stability is becoming a primary focus for institutional traders.
+
+[THE CONTEXT]
+In recent weeks, consumer pressure has mounted, forcing a rotation out of traditionally safe consumer goods and into high-yield dividend stocks in the banking sector. The ${category} landscape requires adapting to this new reality. The data shows exactly why sticking to old playbooks might be dangerous right now.
+
+[THE KORO TAKE]
+This is where the real money is made or lost. Do not panic sell into an algorithmic dip. Look at the specific cash flows of the companies you own. If they can pass inflation costs to consumers, hold. If they can't, it's time to rebalance.
+
+[RELATED TICKERS]
+- GTCO: Approaching a critical resistance level.
+- MTNN: Showing unusual volume in the last 48 hours.
+- ZENITHBANK: A classic dividend play that remains safe for now.`,
+                category,
+                tag_colour: CATEGORIES[category]?.tag_colour || "#5B2ECC",
+                read_time: CATEGORIES[category]?.read_time || 4,
+                slug
+            };
+        }
+
         if (article) {
             articles.push(article);
             console.log(`✓ Generated [${category}]: "${article.title}"`);
