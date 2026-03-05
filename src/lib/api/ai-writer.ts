@@ -371,8 +371,9 @@ export async function generateArticle(
             read_time: def.read_time,
             slug
         };
-    } catch (error) {
-        console.error(`Gemini error for category "${category}":`, error);
+    } catch (error: any) {
+        console.error(`Gemini error for category "${category}":`);
+        console.error(error);
         return null;
     }
 }
