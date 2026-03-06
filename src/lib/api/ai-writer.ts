@@ -1,6 +1,7 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+// Migrated from Gemini to Groq (OpenAI-compatible)
+const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const MODEL = "llama-3.3-70b-versatile";
 
 export interface TrendingTopic {
     headlines: string[];
@@ -335,26 +336,50 @@ export async function generateArticle(
     marketData: string = ""
 ): Promise<GeneratedArticle | null> {
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-        const def = CATEGORIES[category];
+        if (!GROQ_API_KEY) {
+            console.error("GROQ_API_KEY is missing in environment variables.");
+            return null;
+        }
 
+        const def = CATEGORIES[category];
         const context = topic.headlines
             .map((h, i) => `- ${h} (via ${topic.sources[i] || "Unknown"})\n  ${topic.summaries[i] || ""}`)
             .join("\n");
 
         const prompt = def.prompt(context, marketData);
 
-        const result = await model.generateContent({
-            contents: [{ role: "user", parts: [{ text: prompt }] }],
-            generationConfig: {
-                temperature: 0.75,
-                maxOutputTokens: 2048,
-                responseMimeType: "application/json"
-            }
+        const response = await fetch(GROQ_API_URL, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${GROQ_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: MODEL,
+                messages: [
+                    {
+                        role: "system",
+                        content: "You are a professional financial journalist. Always respond with valid JSON."
+                    },
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+                response_format: { type: "json_object" },
+                temperature: 0.7,
+                max_completion_tokens: 2048
+            })
         });
 
-        const responseText = result.response.text();
-        const parsed = JSON.parse(responseText);
+        if (!response.ok) {
+            const errorData = await response.text();
+            throw new Error(`Groq API error (${response.status}): ${errorData}`);
+        }
+
+        const data = await response.json();
+        const content = data.choices[0].message.content;
+        const parsed = JSON.parse(content);
 
         const slug = parsed.title
             .toLowerCase()
@@ -372,8 +397,7 @@ export async function generateArticle(
             slug
         };
     } catch (error: any) {
-        console.error(`Gemini error for category "${category}":`);
-        console.error(error);
+        console.error(`Groq error for category "${category}":`, error.message);
         return null;
     }
 }
@@ -401,7 +425,7 @@ export async function generateCycleArticles(
             articles.push(article);
             console.log(`✓ Generated [${category}]: "${article.title}"`);
         } else {
-            console.warn(`✗ Skipped [${category}]: Gemini generation failed.`);
+            console.warn(`✗ Skipped [${category}]: Groq generation failed.`);
         }
     }
 
