@@ -23,10 +23,6 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://korofinance.com'),
   title: "Korofinance | Where money makes sense.",
   description: "Simplifying financial growth, real-time markets, and economy insights for every Nigerian.",
-  icons: {
-    icon: "/favicon-premium.png",
-    apple: "/apple-touch-icon.png",
-  },
   alternates: {
     canonical: "https://korofinance.com",
   },

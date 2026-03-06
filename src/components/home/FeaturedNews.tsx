@@ -7,7 +7,6 @@ import useSWR from "swr";
 import { getLiveNews } from "@/lib/api/news";
 
 export default function FeaturedNews() {
-    // Keep using the existing mock logic, as NewsAPI requires key and prompt says "or mock equivalent if key missing"
     const { data: news, isLoading } = useSWR("live_news", getLiveNews);
 
     const articles = news ? news.slice(0, 3) : [];
